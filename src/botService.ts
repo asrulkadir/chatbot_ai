@@ -15,10 +15,8 @@ export class BotService {
   private messageService: MessageService;
   private userSessions: UserSessions = {};
   private isPolling = false;
-  private config: BotConfig;
 
   constructor(config: BotConfig) {
-    this.config = config;
     
     // Initialize core services
     this.telegramService = new TelegramService(config.telegramToken);
@@ -52,9 +50,7 @@ export class BotService {
       this.telegramService,
       this.chatGPTService,
       this.commandService,
-      config,
       this.userSessions,
-      this.weatherService || undefined
     );
   }
 

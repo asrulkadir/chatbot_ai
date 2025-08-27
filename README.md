@@ -1,26 +1,30 @@
-# AI Chatbot Telegram dengan ChatGPT
+# AI Telegram Chatbot with ChatGPT Integration
 
-Bot Telegram yang terintegrasi dengan ChatGPT menggunakan Node.js dan TypeScript.
+A sophisticated Telegram bot integrated with ChatGPT, featuring weather services and workout reminders, built with Node.js and TypeScript using a clean service-based architecture.
 
-## 🚀 Fitur
+## 🚀 Features
 
-- ✅ Integrasi penuh dengan ChatGPT (OpenAI API)
-- ✅ Menyimpan history percakapan untuk konteks yang lebih baik
-- ✅ Mendukung bahasa Indonesia
-- ✅ Command yang mudah digunakan
-- ✅ Error handling yang robust
-- ✅ TypeScript untuk type safety
+- ✅ Full ChatGPT integration with conversation history
+- ✅ AI mode on/off functionality with trigger commands
+- ✅ Real-time weather information (OpenWeatherMap API)
+- ✅ Smart workout recommendations based on weather conditions
+- ✅ Automated weekend workout reminders with weather checking
+- ✅ Clean modular service-based architecture
+- ✅ Robust error handling and logging
+- ✅ TypeScript for type safety
+- ✅ Support for both Indonesian and English languages
 
-## 📋 Prasyarat
+## 📋 Prerequisites
 
-1. **Node.js** (versi 16 atau lebih tinggi)
-2. **npm** atau **yarn**
-3. **Bot Telegram Token** - Dapatkan dari [@BotFather](https://t.me/botfather)
-4. **OpenAI API Key** - Dapatkan dari [OpenAI Platform](https://platform.openai.com/api-keys)
+1. **Node.js** (version 16 or higher)
+2. **npm** or **yarn**
+3. **Telegram Bot Token** - Get from [@BotFather](https://t.me/botfather)
+4. **OpenAI API Key** - Get from [OpenAI Platform](https://platform.openai.com/api-keys)
+5. **OpenWeatherMap API Key** (Optional) - Get from [OpenWeatherMap](https://openweathermap.org/api)
 
-## 🛠️ Instalasi
+## 🛠️ Installation
 
-1. Clone repository ini:
+1. Clone this repository:
    ```bash
    git clone <repository-url>
    cd ai-chatbot-telegram
@@ -31,50 +35,58 @@ Bot Telegram yang terintegrasi dengan ChatGPT menggunakan Node.js dan TypeScript
    npm install
    ```
 
-3. Copy file environment:
+3. Copy environment file:
    ```bash
    cp .env.example .env
    ```
 
-4. Edit file `.env` dan isi dengan token Anda:
+4. Edit `.env` file with your API keys:
    ```env
+   # Required
    TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
    OPENAI_API_KEY=your_openai_api_key_here
    
-   # Optional configuration
-   OPENAI_MODEL=gpt-3.5-turbo
+   # Optional ChatGPT Configuration
+   OPENAI_MODEL=gpt-4
    MAX_TOKENS=1000
    TEMPERATURE=0.7
+   
+   # Optional Weather Service
+   OPENWEATHER_API_KEY=your_openweather_api_key_here
+   CITY_NAME=Jakarta
+   COUNTRY_CODE=ID
+   
+   # Optional Workout Reminder
+   REMINDER_USER_ID=your_telegram_user_id_here
+   REMINDER_TIME=08:00
+   REMINDER_TIMEZONE=Asia/Jakarta
    ```
 
-## 🎯 Cara Mendapatkan Token
+## 🎯 How to Get API Keys
 
 ### Telegram Bot Token
 
-1. Buka Telegram dan cari [@BotFather](https://t.me/botfather)
-2. Kirim perintah `/newbot`
-3. Ikuti instruksi untuk memberi nama bot Anda
-4. Salin token yang diberikan dan masukkan ke file `.env`
+1. Open Telegram and search for [@BotFather](https://t.me/botfather)
+2. Send command `/newbot`
+3. Follow instructions to name your bot
+4. Copy the token and add it to `.env` file
 
 ### OpenAI API Key
 
-1. Kunjungi [OpenAI Platform](https://platform.openai.com/)
-2. Daftar atau login ke akun Anda
-3. Buka halaman [API Keys](https://platform.openai.com/api-keys)
-4. Klik "Create new secret key"
-5. Salin API key dan masukkan ke file `.env`
+1. Visit [OpenAI Platform](https://platform.openai.com/)
+2. Register or login to your account
+3. Go to [API Keys](https://platform.openai.com/api-keys) page
+4. Click "Create new secret key"
+5. Copy the API key and add it to `.env` file
 
-## 🚀 Menjalankan Bot
+### OpenWeatherMap API Key (Optional)
 
-### Quick Setup
-```bash
-npm run setup
-```
+1. Visit [OpenWeatherMap](https://openweathermap.org/api)
+2. Sign up for a free account
+3. Go to API keys section
+4. Copy your API key and add it to `.env` file
 
-### Test Konfigurasi
-```bash
-npm run test-config
-```
+## 🚀 Running the Bot
 
 ### Development Mode
 ```bash
@@ -87,92 +99,34 @@ npm run build
 npm start
 ```
 
-## 📱 Command Bot
+## 📱 Bot Commands
 
-- `/start` - Memulai percakapan dengan bot
-- `/help` - Menampilkan bantuan dan informasi
-- `/clear` - Menghapus history percakapan
+### Basic Commands
+- `/start` - Start conversation with the bot
+- `/help` - Show help and available commands
+- `/clear` - Clear conversation history
 
-## �️ Scripts Tersedia
+### AI Mode Commands
+- `/ai` - Enable AI ChatGPT mode
+- `/aioff` - Disable AI ChatGPT mode
 
-| Script | Deskripsi |
+### Weather & Workout Commands
+- `/weather` - Get current weather information
+- `/workout` - Get weather-based workout recommendations
+- `/reminder` - Enable weekend workout reminders
+- `/stopreminder` - Disable workout reminders
+
+### Smart Features
+- **Auto Weather Detection**: Ask about "weather", "cuaca", "temperature" to get automatic weather info
+- **Auto Workout Detection**: Ask about "workout", "olahraga", "exercise" to get workout recommendations based on weather
+- **AI Mode**: When enabled, all messages are processed by ChatGPT
+- **Weather-based Reminders**: Automatic weekend reminders with weather checking
+
+## 🛠️ Available Scripts
+
+| Script | Description |
 |--------|-----------|
-| `npm run setup` | Setup awal project (membuat .env) |
-| `npm run test-config` | Test validitas konfigurasi |
-| `npm run dev` | Jalankan bot dalam mode development |
-| `npm run build` | Compile TypeScript ke JavaScript |
-| `npm start` | Jalankan bot dalam mode production |
-| `npm run watch` | Watch mode untuk development |
-| `npm run clean` | Hapus folder dist |
-| `npm run lint` | Check TypeScript tanpa compile |
-| `./setup.sh` | Setup script bash |
-| `./deploy.sh` | Deploy script untuk production |
-
-## �🔧 Konfigurasi
-
-Anda dapat menyesuaikan perilaku ChatGPT dengan mengubah variabel di file `.env`:
-
-- `OPENAI_MODEL`: Model yang digunakan (default: gpt-3.5-turbo)
-- `MAX_TOKENS`: Maksimal token untuk respons (default: 1000)
-- `TEMPERATURE`: Kreativitas respons 0-1 (default: 0.7)
-
-## 📁 Struktur Project
-
-```
-ai-chatbot-telegram/
-├── src/
-│   ├── index.ts          # File utama bot
-│   ├── types.ts          # Type definitions
-│   ├── utils.ts          # Utility functions
-│   └── test-config.ts    # Test konfigurasi
-├── dist/                 # Compiled JavaScript (auto-generated)
-├── .vscode/              # VS Code configuration
-│   ├── launch.json       # Debug configuration
-│   └── extensions.json   # Recommended extensions
-├── .env.example          # Template environment variables
-├── .env                  # Environment variables (buat manual)
-├── package.json          # Dependencies dan scripts
-├── tsconfig.json         # TypeScript configuration
-├── setup.sh              # Setup script
-└── README.md            # Dokumentasi ini
-```
-
-## 🛡️ Keamanan
-
-- Jangan pernah commit file `.env` ke repository
-- Simpan API key dengan aman
-- Gunakan environment variables untuk konfigurasi sensitif
-
-## 🐛 Troubleshooting
-
-### Bot tidak merespons
-- Pastikan token Telegram sudah benar
-- Cek koneksi internet
-- Lihat log error di console
-
-### Error OpenAI
-- Pastikan API key OpenAI valid dan memiliki credit
-- Cek quota API limit
-- Pastikan model yang digunakan tersedia
-
-### TypeScript errors
-- Jalankan `npm run build` untuk melihat error detail
-- Pastikan semua dependencies terinstall
-
-## 📄 License
-
-MIT License - silakan gunakan untuk proyek pribadi atau komersial.
-
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Silakan:
-
-1. Fork repository ini
-2. Buat branch feature baru
-3. Commit perubahan Anda
-4. Push ke branch
-5. Buat Pull Request
-
-## 📞 Support
-
-Jika ada pertanyaan atau masalah, silakan buat issue di repository ini.
+| `npm run dev` | Run bot in development mode |
+| `npm run build` | Compile TypeScript to JavaScript |
+| `npm start` | Run bot in production mode |
+| `npm run lint` | Check TypeScript without compiling |

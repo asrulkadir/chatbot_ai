@@ -15,7 +15,7 @@ export function loadConfig(): BotConfig {
   return {
     telegramToken,
     openaiApiKey,
-    openaiModel: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+    openaiModel: process.env.OPENAI_MODEL || 'chatgpt-4o-latest',
     maxTokens: Number(process.env.MAX_TOKENS || '1000'),
     temperature: parseFloat(process.env.TEMPERATURE || '0.7'),
     openweatherApiKey: process.env.OPENWEATHER_API_KEY,

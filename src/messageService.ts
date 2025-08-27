@@ -1,32 +1,25 @@
-import type { UserSessions, BotConfig } from './types';
-import type { TelegramService } from './telegramService';
-import type { WeatherService } from './weatherService';
 import type { ChatGPTService } from './chatGPTService';
 import type { CommandService } from './commandService';
 import { formatUserName } from './utils';
+import type { TelegramService } from './telegramService';
+import type { UserSessions } from './types';
 
 export class MessageService {
   private telegramService: TelegramService;
   private chatGPTService: ChatGPTService;
   private commandService: CommandService;
-  private weatherService: WeatherService | null;
   private userSessions: UserSessions;
-  private config: BotConfig;
 
   constructor(
     telegramService: TelegramService,
     chatGPTService: ChatGPTService,
     commandService: CommandService,
-    config: BotConfig,
     userSessions: UserSessions,
-    weatherService?: WeatherService
   ) {
     this.telegramService = telegramService;
     this.chatGPTService = chatGPTService;
     this.commandService = commandService;
-    this.config = config;
     this.userSessions = userSessions;
-    this.weatherService = weatherService || null;
   }
 
   async processMessage(
