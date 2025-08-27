@@ -9,6 +9,7 @@ export interface ChatHistory {
 
 export interface UserSession {
   aiMode: boolean;
+  language: 'id' | 'en';
   lastActivity?: Date;
 }
 

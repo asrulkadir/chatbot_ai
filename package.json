@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
+    "dev": "nodemon --exec ts-node src/main.ts",
     "watch": "tsc -w",
     "setup": "./setup.sh",
     "clean": "rm -rf dist",
@@ -24,10 +24,11 @@
   "author": "Asrul Kadir",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.6.7",
     "dotenv": "^16.3.1",
-    "openai": "^4.28.4",
     "node-cron": "^3.0.3",
-    "axios": "^1.6.7"
+    "nodemon": "^3.1.10",
+    "openai": "^4.28.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

@@ -4,6 +4,7 @@ import type { WeatherService } from './weatherService';
 import type { WorkoutReminderService } from './workoutReminderService';
 import type { ChatGPTService } from './chatGPTService';
 import { formatTemperature, getWeatherEmoji } from './utils';
+import { getMessages } from './messages';
 
 export class CommandService {
   private telegramService: TelegramService;
@@ -29,55 +30,60 @@ export class CommandService {
     this.workoutReminderService = workoutReminderService || null;
   }
 
-  async handleStartCommand(chatId: number): Promise<void> {
+  async handleStartCommand(chatId: number, userId?: number): Promise<void> {
+    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
+    const msg = getMessages(language);
+    
     const welcomeMessage = `
-🤖 *Selamat datang di AI Chatbot!*
+${msg.welcome.title}
 
-Halo! Saya adalah chatbot AI yang didukung oleh ChatGPT. Saya siap membantu Anda dengan berbagai pertanyaan dan percakapan.
+${msg.welcome.description}
 
-*Cara menggunakan:*
-• Ketik /ai untuk mengaktifkan mode AI ChatGPT
-• Ketik /ai_off untuk menonaktifkan mode AI
-• Tanya tentang cuaca atau workout untuk info otomatis
-• Ketik /clear untuk menghapus history percakapan
-• Ketik /help untuk melihat bantuan
+${msg.welcome.usage}
+${msg.welcome.aiMode}
+${msg.welcome.aiOff}
+${msg.welcome.weather}
+${msg.welcome.help}
 
-Silakan mulai percakapan dengan mengirim pesan!
+${msg.welcome.start}
     `;
 
     await this.telegramService.sendMessage(chatId, welcomeMessage, 'Markdown');
   }
 
-  async handleHelpCommand(chatId: number): Promise<void> {
+  async handleHelpCommand(chatId: number, userId?: number): Promise<void> {
+    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
+    const msg = getMessages(language);
+    
     const helpMessage = `
-📋 *Bantuan AI Chatbot*
+${msg.help.title}
 
-*Perintah yang tersedia:*
-• /start - Memulai percakapan
-• /help - Menampilkan bantuan ini
-• /clear - Menghapus history percakapan
-• /ai - Aktifkan mode AI ChatGPT
-• /ai_off - Nonaktifkan mode AI ChatGPT
-• /weather - Cek cuaca saat ini
-• /workout - Cek cuaca untuk olahraga
-• /reminder - Atur pengingat olahraga weekend
-• /stop_reminder - Hentikan pengingat olahraga
+${msg.help.commands}
+${msg.commands.start}
+${msg.commands.help}
+${msg.commands.clear}
+${msg.commands.ai}
+${msg.commands.aiOff}
+${msg.commands.weather}
+${msg.commands.workout}
+${msg.commands.reminder}
+${msg.commands.stopReminder}
 
-*Fitur:*
-• 💬 Percakapan natural dengan AI (perlu aktivasi)
-• 🧠 Menyimpan konteks percakapan
-• 🌍 Mendukung bahasa Indonesia
-• ⚡ Respons cepat dan akurat
-• 🌤️ Informasi cuaca real-time
-• 🏃‍♂️ Pengingat olahraga otomatis
-• 🤖 Mode AI on/off sesuai kebutuhan
+${msg.help.features}
+• 💬 ${language === 'id' ? 'Percakapan natural dengan AI (perlu aktivasi)' : 'Natural conversation with AI (activation required)'}
+• 🧠 ${language === 'id' ? 'Menyimpan konteks percakapan' : 'Save conversation context'}
+• 🌍 ${language === 'id' ? 'Mendukung bahasa Indonesia dan Inggris' : 'Support Indonesian and English languages'}
+• ⚡ ${language === 'id' ? 'Respons cepat dan akurat' : 'Fast and accurate responses'}
+• 🌤️ ${language === 'id' ? 'Informasi cuaca real-time' : 'Real-time weather information'}
+• 🏃‍♂️ ${language === 'id' ? 'Pengingat olahraga otomatis' : 'Automatic workout reminders'}
+• 🤖 ${language === 'id' ? 'Mode AI on/off sesuai kebutuhan' : 'AI mode on/off as needed'}
 
-*Tips:*
-• Aktifkan mode AI dengan /ai untuk chat dengan ChatGPT
-• Tanya tentang "cuaca" atau "workout" untuk info otomatis
-• Pengingat olahraga akan dikirim setiap Sabtu
+${msg.help.tips}
+${msg.help.aiActivation}
+${msg.help.weatherAuto}
+${msg.help.reminders}
 
-Mulai percakapan dengan mengirim pesan apa saja!
+${msg.help.startMessage}
     `;
 
     await this.telegramService.sendMessage(chatId, helpMessage, 'Markdown');
@@ -85,40 +91,54 @@ Mulai percakapan dengan mengirim pesan apa saja!
 
   async handleClearCommand(chatId: number, userId: number): Promise<void> {
     this.chatGPTService.clearHistory(userId);
-    await this.telegramService.sendMessage(chatId, '🗑️ History percakapan telah dihapus. Silakan mulai percakapan baru!');
+    
+    const language = this.userSessions[userId]?.language || 'en';
+    const msg = getMessages(language);
+    
+    await this.telegramService.sendMessage(chatId, msg.messages.historyCleared);
   }
 
   async handleAICommand(chatId: number, userId: number): Promise<void> {
     if (!this.userSessions[userId]) {
-      this.userSessions[userId] = { aiMode: false };
+      this.userSessions[userId] = { aiMode: false, language: 'en' };
     }
     
     this.userSessions[userId].aiMode = true;
     
+    const language = this.userSessions[userId].language;
+    const msg = getMessages(language);
+    
     await this.telegramService.sendMessage(
       chatId, 
-      '🤖 *Mode AI ChatGPT diaktifkan!*\n\nSekarang semua pesan Anda akan diproses oleh ChatGPT. Ketik /ai_off untuk menonaktifkan.',
+      msg.messages.aiModeEnabled,
       'Markdown'
     );
   }
 
   async handleAIOffCommand(chatId: number, userId: number): Promise<void> {
     if (!this.userSessions[userId]) {
-      this.userSessions[userId] = { aiMode: false };
+      this.userSessions[userId] = { aiMode: false, language: 'en' };
     }
     
     this.userSessions[userId].aiMode = false;
     
+    const language = this.userSessions[userId].language;
+    const msg = getMessages(language);
+    
     await this.telegramService.sendMessage(
       chatId, 
-      '🚫 *Mode AI ChatGPT dinonaktifkan!*\n\nSekarang bot akan merespons hanya untuk command khusus dan query cuaca/workout.',
+      msg.messages.aiModeDisabled,
       'Markdown'
     );
   }
 
-  async handleWeatherCommand(chatId: number): Promise<void> {
+  async handleWeatherCommand(chatId: number, userId?: number): Promise<void> {
+    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
+    console.log('Detected language:', language);
+    const msg = getMessages(language);
+    
     if (!this.weatherService) {
-      await this.telegramService.sendMessage(chatId, '❌ Layanan cuaca tidak tersedia. API key cuaca belum dikonfigurasi.');
+      await this.telegramService.sendMessage(chatId, msg.messages.weatherUnavailable);
       return;
     }
 
@@ -127,34 +147,38 @@ Mulai percakapan dengan mengirim pesan apa saja!
       
       const weather = await this.weatherService.getCurrentWeather(
         this.config.cityName || 'Jakarta',
-        this.config.countryCode || 'ID'
+        this.config.countryCode || 'ID',
+        language
       );
       
       const weatherEmoji = getWeatherEmoji(weather.weather[0].main);
       
       const message = `
-🌤️ *Cuaca Saat Ini*
+${msg.weather.currentWeather}
 
-📍 *Lokasi:* ${weather.name}
-${weatherEmoji} *Kondisi:* ${weather.weather[0].description}
-🌡️ *Suhu:* ${formatTemperature(weather.main.temp)} (terasa ${formatTemperature(weather.main.feels_like)})
-💧 *Kelembaban:* ${weather.main.humidity}%
-🌪️ *Kecepatan Angin:* ${weather.wind.speed} m/s
-👁️ *Visibilitas:* ${weather.visibility/1000} km
+${msg.weather.location} ${weather.name}
+${weatherEmoji} ${msg.weather.condition} ${weather.weather[0].description}
+${msg.weather.temperature} ${formatTemperature(weather.main.temp)} (${language === 'id' ? 'terasa' : 'feels like'} ${formatTemperature(weather.main.feels_like)})
+${msg.weather.humidity} ${weather.main.humidity}%
+${msg.weather.windSpeed} ${weather.wind.speed} m/s
+${msg.weather.visibility} ${weather.visibility/1000} km
 
-_Data diambil dari OpenWeatherMap_
+${msg.weather.dataSource}
       `;
       
       await this.telegramService.sendMessage(chatId, message, 'Markdown');
     } catch (error) {
       console.error('Error getting weather:', error);
-      await this.telegramService.sendMessage(chatId, '❌ Maaf, tidak bisa mengambil data cuaca saat ini. Silakan coba lagi nanti.');
+      await this.telegramService.sendMessage(chatId, msg.messages.weatherError);
     }
   }
 
-  async handleWorkoutCommand(chatId: number): Promise<void> {
+  async handleWorkoutCommand(chatId: number, userId?: number): Promise<void> {
+    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
+    const msg = getMessages(language);
+    
     if (!this.weatherService) {
-      await this.telegramService.sendMessage(chatId, '❌ Layanan cuaca tidak tersedia. API key cuaca belum dikonfigurasi.');
+      await this.telegramService.sendMessage(chatId, msg.messages.weatherUnavailable);
       return;
     }
 
@@ -163,7 +187,8 @@ _Data diambil dari OpenWeatherMap_
       
       const weatherCheck = await this.weatherService.isGoodWeatherForWorkout(
         this.config.cityName || 'Jakarta',
-        this.config.countryCode || 'ID'
+        this.config.countryCode || 'ID',
+        language
       );
       
       const weather = weatherCheck.weather;
@@ -173,109 +198,116 @@ _Data diambil dari OpenWeatherMap_
       
       if (weatherCheck.isGood) {
         message = `
-🏃‍♂️ *Cuaca Bagus untuk Olahraga!* ${weatherEmoji}
+${msg.weather.goodForWorkout} ${weatherEmoji}
 
-📍 *Lokasi:* ${weather.name}
-🌡️ *Suhu:* ${formatTemperature(weather.main.temp)} (terasa ${formatTemperature(weather.main.feels_like)})
-💧 *Kelembaban:* ${weather.main.humidity}%
-🌪️ *Angin:* ${weather.wind.speed} m/s
-☀️ *Kondisi:* ${weather.weather[0].description}
+${msg.weather.location} ${weather.name}
+${msg.weather.temperature} ${formatTemperature(weather.main.temp)} (${language === 'id' ? 'terasa' : 'feels like'} ${formatTemperature(weather.main.feels_like)})
+${msg.weather.humidity} ${weather.main.humidity}%
+🌪️ ${language === 'id' ? '*Angin:*' : '*Wind:*'} ${weather.wind.speed} m/s
+☀️ ${msg.weather.condition} ${weather.weather[0].description}
 
 ✅ ${weatherCheck.reason}
 
-*Rekomendasi:*
-• Gunakan pakaian olahraga yang sesuai
-• Jangan lupa minum air yang cukup
-• Lakukan pemanasan sebelum olahraga
-• Pilih waktu yang tepat untuk berolahraga
+${msg.weather.recommendations}
+${msg.weather.useProperClothing}
+${msg.weather.stayHydrated}
+${msg.weather.warmUp}
+${msg.weather.chooseRightTime}
 
-Selamat berolahraga! 💪🔥
+${msg.weather.enjoyWorkout}
         `;
       } else {
         message = `
-🏠 *Cuaca Kurang Ideal untuk Olahraga Outdoor* ${weatherEmoji}
+${msg.weather.notGoodForWorkout} ${weatherEmoji}
 
-📍 *Lokasi:* ${weather.name}
-🌡️ *Suhu:* ${formatTemperature(weather.main.temp)} (terasa ${formatTemperature(weather.main.feels_like)})
-💧 *Kelembaban:* ${weather.main.humidity}%
-🌪️ *Angin:* ${weather.wind.speed} m/s
-⛅ *Kondisi:* ${weather.weather[0].description}
+${msg.weather.location} ${weather.name}
+${msg.weather.temperature} ${formatTemperature(weather.main.temp)} (${language === 'id' ? 'terasa' : 'feels like'} ${formatTemperature(weather.main.feels_like)})
+${msg.weather.humidity} ${weather.main.humidity}%
+🌪️ ${language === 'id' ? '*Angin:*' : '*Wind:*'} ${weather.wind.speed} m/s
+⛅ ${msg.weather.condition} ${weather.weather[0].description}
 
 ⚠️ ${weatherCheck.reason}
 
-*Alternatif olahraga indoor:*
-• 🏋️‍♂️ Workout di rumah
-• 🧘‍♀️ Yoga atau stretching
-• 💃 Dance workout
-• 🥊 Shadow boxing
+${msg.weather.indoorAlternatives}
+${msg.weather.homeWorkout}
+${msg.weather.yoga}
+${msg.weather.dance}
+${msg.weather.shadowBoxing}
 
-Tetap semangat berolahraga! 💪
+${msg.weather.keepSpirit}
         `;
       }
       
       await this.telegramService.sendMessage(chatId, message, 'Markdown');
     } catch (error) {
       console.error('Error checking workout weather:', error);
-      await this.telegramService.sendMessage(chatId, '❌ Maaf, tidak bisa mengecek cuaca untuk olahraga saat ini. Silakan coba lagi nanti.');
+      await this.telegramService.sendMessage(chatId, msg.messages.workoutError);
     }
   }
 
   async handleReminderCommand(chatId: number, userId: number): Promise<void> {
+    const language = this.userSessions[userId]?.language || 'en';
+    const msg = getMessages(language);
+    
     if (!this.workoutReminderService) {
-      await this.telegramService.sendMessage(chatId, '❌ Layanan pengingat tidak tersedia.');
+      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ Layanan pengingat tidak tersedia.' : '❌ Reminder service is not available.');
       return;
     }
 
     if (!this.config.openweatherApiKey) {
-      await this.telegramService.sendMessage(chatId, '❌ API key cuaca belum dikonfigurasi. Pengingat tidak dapat diaktifkan.');
+      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ API key cuaca belum dikonfigurasi. Pengingat tidak dapat diaktifkan.' : '❌ Weather API key not configured. Reminder cannot be enabled.');
       return;
     }
 
     try {
       if (this.workoutReminderService.isReminderActive()) {
-        await this.telegramService.sendMessage(chatId, '✅ Pengingat olahraga sudah aktif! Anda akan mendapat pengingat setiap hari Sabtu.');
+        await this.telegramService.sendMessage(chatId, msg.messages.reminderAlreadyActive);
         return;
       }
 
       this.workoutReminderService.startWeekendReminder(
         userId,
-        this.config.reminderTime || '08:00',
+        this.config.reminderTime || '17:00',
         this.config.reminderTimezone || 'Asia/Jakarta',
         this.config.cityName || 'Jakarta',
-        this.config.countryCode || 'ID'
+        this.config.countryCode || 'ID',
+        language
       );
 
       const message = `
-🏃‍♂️ *Pengingat Olahraga Diaktifkan!*
+${msg.messages.reminderEnabled}
 
-✅ Anda akan mendapat pengingat olahraga setiap *hari Sabtu* jam *${this.config.reminderTime}*
-📍 Lokasi cuaca: ${this.config.cityName}, ${this.config.countryCode}
-🕐 Timezone: ${this.config.reminderTimezone}
+${msg.reminder.weekendTime} *${this.config.reminderTime}*
+${msg.reminder.location} ${this.config.cityName}, ${this.config.countryCode}
+${msg.reminder.timezone} ${this.config.reminderTimezone}
 
-Bot akan mengecek cuaca terlebih dahulu dan memberikan rekomendasi olahraga yang sesuai.
+${msg.reminder.weatherCheck}
 
-Gunakan /stop_reminder untuk menghentikan pengingat.
+${msg.reminder.stopInstruction}
       `;
 
       await this.telegramService.sendMessage(chatId, message, 'Markdown');
     } catch (error) {
       console.error('Error setting up reminder:', error);
-      await this.telegramService.sendMessage(chatId, '❌ Gagal mengatur pengingat. Silakan coba lagi nanti.');
+      await this.telegramService.sendMessage(chatId, msg.messages.reminderError);
     }
   }
 
-  async handleStopReminderCommand(chatId: number): Promise<void> {
+  async handleStopReminderCommand(chatId: number, userId?: number): Promise<void> {
+    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
+    const msg = getMessages(language);
+    
     if (!this.workoutReminderService) {
-      await this.telegramService.sendMessage(chatId, '❌ Layanan pengingat tidak tersedia.');
+      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ Layanan pengingat tidak tersedia.' : '❌ Reminder service is not available.');
       return;
     }
 
     if (!this.workoutReminderService.isReminderActive()) {
-      await this.telegramService.sendMessage(chatId, '⚠️ Pengingat olahraga tidak sedang aktif.');
+      await this.telegramService.sendMessage(chatId, msg.messages.reminderNotActive);
       return;
     }
 
     this.workoutReminderService.stopReminder();
-    await this.telegramService.sendMessage(chatId, '🛑 Pengingat olahraga telah dihentikan.');
+    await this.telegramService.sendMessage(chatId, msg.messages.reminderStopped);
   }
 }

@@ -1,6 +1,7 @@
 import * as cron from 'node-cron';
 import { WeatherService } from './weatherService';
 import { formatTemperature, getWeatherEmoji } from './utils';
+import { getMessages } from './messages';
 
 export class WorkoutReminderService {
   private weatherService: WeatherService | null = null;
@@ -23,9 +24,10 @@ export class WorkoutReminderService {
     time: string,
     timezone: string,
     cityName: string,
-    countryCode: string
+    countryCode: string,
+    language: 'id' | 'en' = 'id'
   ): void {
-    // Schedule untuk setiap hari Sabtu
+    // Schedule reminder for every Saturday
     // Format: 'minute hour * * day'
     // day: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     const [hour, minute] = time.split(':');
@@ -37,7 +39,7 @@ export class WorkoutReminderService {
     this.reminderJob = cron.schedule(
       cronExpression,
       async () => {
-        await this.sendWorkoutReminder(userId, cityName, countryCode);
+        await this.sendWorkoutReminder(userId, cityName, countryCode, language);
       },
       {
         scheduled: true,
@@ -48,106 +50,108 @@ export class WorkoutReminderService {
     console.log(`✅ Pengingat workout berhasil diatur!`);
   }
 
-  private async sendWorkoutReminder(userId: number, cityName: string, countryCode: string): Promise<void> {
+  private async sendWorkoutReminder(userId: number, cityName: string, countryCode: string, language: 'id' | 'en' = 'id'): Promise<void> {
     try {
       console.log(`🏃‍♂️ Mengirim pengingat workout ke user ${userId}`);
+      const messages = getMessages(language);
 
       if (!this.weatherService) {
         // Jika tidak ada weather service, kirim pengingat biasa
         const message = `
-🏃‍♂️ *Pengingat Olahraga Weekend!*
+${messages.workoutReminder.basicReminder.title}
 
-Halo! Ini hari Sabtu, saatnya berolahraga! 💪
+${messages.workoutReminder.basicReminder.greeting}
 
-Jangan lupa untuk:
-• Pemanasan sebelum olahraga
-• Minum air yang cukup
-• Gunakan sepatu olahraga yang nyaman
+${messages.workoutReminder.basicReminder.dontForget}
+${messages.workoutReminder.basicReminder.warmUp}
+${messages.workoutReminder.basicReminder.stayHydrated}
+${messages.workoutReminder.basicReminder.comfortableShoes}
 
-Selamat berolahraga! 🔥
+${messages.workoutReminder.basicReminder.enjoyWorkout}
         `;
         
         await this.sendMessageFunc(userId, message, 'Markdown');
         return;
       }
 
-      // Cek cuaca terlebih dahulu
-      const weatherCheck = await this.weatherService.isGoodWeatherForWorkout(cityName, countryCode);
+      // Check weather conditions
+      const weatherCheck = await this.weatherService.isGoodWeatherForWorkout(cityName, countryCode, language);
       const weather = weatherCheck.weather;
       const weatherEmoji = getWeatherEmoji(weather.weather[0].main);
       
       if (weatherCheck.isGood) {
-        // Cuaca bagus - ajak jogging
+        // Weather is good - suggest jogging
         const message = `
-🏃‍♂️ *Pengingat Olahraga Weekend!*
+${messages.workoutReminder.weekendTitleGoodWeather}
 
-Halo! Ini hari Sabtu dan cuaca sedang bagus untuk jogging! ${weatherEmoji}
+${messages.workoutReminder.goodWeather.greeting} ${weatherEmoji}
 
-📍 *Cuaca di ${weather.name}:*
-🌡️ Suhu: ${formatTemperature(weather.main.temp)} (terasa ${formatTemperature(weather.main.feels_like)})
-💧 Kelembaban: ${weather.main.humidity}%
-🌪️ Angin: ${weather.wind.speed} m/s
-👁️ Visibilitas: ${weather.visibility/1000} km
+${messages.workoutReminder.weatherInfo} ${weather.name}:*
+${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
+${messages.workoutReminder.humidity} ${weather.main.humidity}%
+${messages.workoutReminder.wind} ${weather.wind.speed} m/s
+${messages.workoutReminder.visibility} ${weather.visibility/1000} km
 
 ${weatherCheck.reason} 🌟
 
-*Tips untuk jogging hari ini:*
-• Gunakan pakaian yang sesuai dengan cuaca
-• Bawa botol air minum
-• Jangan lupa pemanasan dan pendinginan
-• Pilih rute yang aman dan nyaman
+${messages.workoutReminder.goodWeather.tipsTitle}
+${messages.workoutReminder.goodWeather.weatherClothing}
+${messages.workoutReminder.goodWeather.bringWater}
+${messages.workoutReminder.goodWeather.warmUpCoolDown}
+${messages.workoutReminder.goodWeather.chooseRoute}
 
-Yuk mulai jogging! 🏃‍♂️💨
+${messages.workoutReminder.goodWeather.letsStart}
         `;
         
         await this.sendMessageFunc(userId, message, 'Markdown');
       } else {
-        // Cuaca tidak bagus - sarankan olahraga indoor
+        // Weather is not good - suggest indoor exercise
         const message = `
-🏠 *Pengingat Olahraga Weekend!*
+${messages.workoutReminder.weekendTitleBadWeather}
 
-Halo! Ini hari Sabtu, tapi... ${weatherEmoji}
+${messages.workoutReminder.badWeather.greeting} ${weatherEmoji}
 
-📍 *Cuaca di ${weather.name}:*
-🌡️ Suhu: ${formatTemperature(weather.main.temp)} (terasa ${formatTemperature(weather.main.feels_like)})
-💧 Kelembaban: ${weather.main.humidity}%
-🌪️ Angin: ${weather.wind.speed} m/s
-☔ Kondisi: ${weather.weather[0].description}
+${messages.workoutReminder.weatherInfo} ${weather.name}:*
+${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
+${messages.workoutReminder.humidity} ${weather.main.humidity}%
+${messages.workoutReminder.wind} ${weather.wind.speed} m/s
+${messages.workoutReminder.condition} ${weather.weather[0].description}
 
 ⚠️ ${weatherCheck.reason}
 
-*Alternatif olahraga indoor:*
-• 🏋️‍♂️ Workout di rumah (push-up, sit-up, plank)
-• 🧘‍♀️ Yoga atau stretching
-• 💃 Dance workout dengan video YouTube
-• 🏃‍♂️ Lari di treadmill (jika ada)
-• 🥊 Shadow boxing
+${messages.workoutReminder.badWeather.alternativesTitle}
+${messages.workoutReminder.badWeather.homeWorkout}
+${messages.workoutReminder.badWeather.yoga}
+${messages.workoutReminder.badWeather.danceWorkout}
+${messages.workoutReminder.badWeather.shadowBoxing}
+${messages.workoutReminder.badWeather.activeGames}
 
-Jangan sampai cuaca menghalangi semangat olahraga! 💪🔥
+${messages.workoutReminder.badWeather.keepSpirit}
         `;
         
         await this.sendMessageFunc(userId, message, 'Markdown');
       }
-
     } catch (error) {
       console.error('Error sending workout reminder:', error);
-      
-      // Fallback message jika ada error
+      const messages = getMessages(language);
+
+      // Fallback message if there's an error
       const fallbackMessage = `
-🏃‍♂️ *Pengingat Olahraga Weekend!*
+${messages.workoutReminder.fallback.title}
 
-Halo! Ini hari Sabtu, saatnya berolahraga! 💪
+${messages.workoutReminder.fallback.greeting}
 
-Maaf, tidak bisa mengecek cuaca saat ini. Tapi jangan biarkan itu menghentikan semangat olahraga Anda!
+${messages.workoutReminder.fallback.weatherError}
 
-Tetap semangat dan jaga kesehatan! 🔥
+${messages.workoutReminder.fallback.suggestions}
+${messages.workoutReminder.fallback.checkWeather}
+${messages.workoutReminder.fallback.sunnyActivity}
+${messages.workoutReminder.fallback.rainyActivity}
+
+${messages.workoutReminder.fallback.enjoy}
       `;
       
-      try {
-        await this.sendMessageFunc(userId, fallbackMessage, 'Markdown');
-      } catch (fallbackError) {
-        console.error('Error sending fallback message:', fallbackError);
-      }
+      await this.sendMessageFunc(userId, fallbackMessage, 'Markdown');
     }
   }
 
@@ -161,11 +165,5 @@ Tetap semangat dan jaga kesehatan! 🔥
 
   isReminderActive(): boolean {
     return this.reminderJob !== null;
-  }
-
-  // Method untuk testing - kirim reminder sekarang
-  async sendTestReminder(userId: number, cityName: string, countryCode: string): Promise<void> {
-    console.log('🧪 Mengirim test reminder...');
-    await this.sendWorkoutReminder(userId, cityName, countryCode);
   }
 }

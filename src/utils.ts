@@ -28,16 +28,46 @@ export function loadConfig(): BotConfig {
 }
 
 export function formatUserName(firstName?: string, lastName?: string, username?: string): string {
-  if (firstName && lastName) {
-    return `${firstName} ${lastName}`;
+  let name = '';
+  if (firstName) name += firstName;
+  if (lastName) name += ` ${lastName}`;
+  if (!name && username) name = username;
+  return name || 'User';
+}
+
+export function detectLanguage(text: string): 'id' | 'en' {
+  const indonesianWords = [
+    'halo', 'hai', 'selamat', 'pagi', 'siang', 'malam', 'terima', 'kasih', 'maaf', 'tolong', 
+    'bantuan', 'bagaimana', 'kapan', 'dimana', 'kenapa', 'siapa', 'apa', 'yang', 'dan', 
+    'atau', 'dengan', 'untuk', 'dari', 'ke', 'di', 'pada', 'dalam', 'cuaca', 'olahraga',
+    'latihan', 'senam', 'lari', 'jalan', 'jogging', 'panas', 'dingin', 'hujan', 'cerah',
+    'mendung', 'angin', 'saya', 'kamu', 'dia', 'kita', 'mereka', 'ini', 'itu', 'disini',
+    'disana', 'sekarang', 'nanti', 'kemarin', 'besok', 'hari', 'minggu', 'bulan', 'tahun'
+  ];
+  
+  const englishWords = [
+    'hello', 'hi', 'good', 'morning', 'afternoon', 'evening', 'thank', 'thanks', 'sorry', 
+    'please', 'help', 'how', 'when', 'where', 'why', 'who', 'what', 'and', 'or', 'with', 
+    'for', 'from', 'to', 'in', 'on', 'at', 'weather', 'workout', 'exercise', 'training',
+    'running', 'jogging', 'walk', 'hot', 'cold', 'rain', 'sunny', 'cloudy', 'wind',
+    'i', 'you', 'he', 'she', 'we', 'they', 'this', 'that', 'here', 'there', 'now',
+    'later', 'yesterday', 'tomorrow', 'day', 'week', 'month', 'year'
+  ];
+  
+  const words = text.toLowerCase().split(/\s+/);
+  let indonesianScore = 0;
+  let englishScore = 0;
+  
+  for (const word of words) {
+    if (indonesianWords.includes(word)) {
+      indonesianScore++;
+    }
+    if (englishWords.includes(word)) {
+      englishScore++;
+    }
   }
-  if (firstName) {
-    return firstName;
-  }
-  if (username) {
-    return `@${username}`;
-  }
-  return 'Unknown User';
+  
+  return indonesianScore > englishScore ? 'id' : 'en';
 }
 
 export function truncateText(text: string, maxLength: number = 100): string {

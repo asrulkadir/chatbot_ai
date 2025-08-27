@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { WeatherData } from './types';
+import { getMessages } from './messages';
 
 export class WeatherService {
   private apiKey: string;
@@ -9,46 +10,48 @@ export class WeatherService {
     this.apiKey = apiKey;
   }
 
-  async getCurrentWeather(city: string, countryCode: string): Promise<WeatherData> {
+  async getCurrentWeather(city: string, countryCode: string, language: 'id' | 'en' = 'en'): Promise<WeatherData> {
     try {
       const response = await axios.get(this.baseUrl, {
         params: {
           q: `${city},${countryCode}`,
           appid: this.apiKey,
           units: 'metric', // Celsius
-          lang: 'id' // Bahasa Indonesia
+          lang: language // Dynamic language based on user preference
         }
       });
 
       return response.data;
     } catch (error) {
       console.error('Error fetching weather data:', error);
-      throw new Error('Gagal mengambil data cuaca');
+      const messages = getMessages(language);
+      throw new Error(messages.weather.errors.fetchFailed);
     }
   }
 
-  async isGoodWeatherForWorkout(city: string, countryCode: string): Promise<{
+  async isGoodWeatherForWorkout(city: string, countryCode: string, language: 'id' | 'en' = 'en'): Promise<{
     isGood: boolean;
     reason: string;
     weather: WeatherData;
   }> {
-    const weather = await this.getCurrentWeather(city, countryCode);
+    const weather = await this.getCurrentWeather(city, countryCode, language);
+    const messages = getMessages(language);
     
     const weatherMain = weather.weather[0].main.toLowerCase();
     const temp = weather.main.temp;
     const humidity = weather.main.humidity;
     const windSpeed = weather.wind.speed;
 
-    // Kriteria cuaca yang baik untuk olahraga outdoor:
-    // - Tidak hujan/badai
-    // - Suhu antara 20-35°C
-    // - Kelembaban < 85%
-    // - Kecepatan angin < 10 m/s
-    
+    // Weather conditions for good jogging:
+    // - No rain/storm
+    // - Temperature between 15-35°C
+    // - Humidity < 85%
+    // - Wind speed < 10 m/s
+
     if (weatherMain.includes('rain') || weatherMain.includes('drizzle')) {
       return {
         isGood: false,
-        reason: 'Sedang hujan, lebih baik olahraga di dalam ruangan',
+        reason: messages.weather.conditions.rainy,
         weather
       };
     }
@@ -56,7 +59,7 @@ export class WeatherService {
     if (weatherMain.includes('thunderstorm')) {
       return {
         isGood: false,
-        reason: 'Ada badai petir, tidak aman untuk olahraga outdoor',
+        reason: messages.weather.conditions.thunderstorm,
         weather
       };
     }
@@ -64,7 +67,7 @@ export class WeatherService {
     if (temp < 15) {
       return {
         isGood: false,
-        reason: 'Cuaca terlalu dingin untuk jogging',
+        reason: messages.weather.conditions.tooCold,
         weather
       };
     }
@@ -72,7 +75,7 @@ export class WeatherService {
     if (temp > 35) {
       return {
         isGood: false,
-        reason: 'Cuaca terlalu panas, lebih baik olahraga sore hari',
+        reason: messages.weather.conditions.tooHot,
         weather
       };
     }
@@ -80,7 +83,7 @@ export class WeatherService {
     if (humidity > 85) {
       return {
         isGood: false,
-        reason: 'Kelembaban sangat tinggi, mungkin tidak nyaman untuk jogging',
+        reason: messages.weather.conditions.highHumidity,
         weather
       };
     }
@@ -88,14 +91,14 @@ export class WeatherService {
     if (windSpeed > 10) {
       return {
         isGood: false,
-        reason: 'Angin terlalu kencang untuk jogging',
+        reason: messages.weather.conditions.strongWind,
         weather
       };
     }
 
     return {
       isGood: true,
-      reason: 'Cuaca sangat bagus untuk jogging!',
+      reason: messages.weather.conditions.perfectForJogging,
       weather
     };
   }

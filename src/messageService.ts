@@ -1,6 +1,7 @@
 import type { ChatGPTService } from './chatGPTService';
 import type { CommandService } from './commandService';
-import { formatUserName } from './utils';
+import { formatUserName, detectLanguage } from './utils';
+import { getMessages } from './messages';
 import type { TelegramService } from './telegramService';
 import type { UserSessions } from './types';
 
@@ -29,11 +30,12 @@ export class MessageService {
   ): Promise<void> {
     const userId = user.id;
     const userName = formatUserName(user.first_name, user.last_name, user.username);
+    const detectedLanguage = detectLanguage(text);
 
-    // Initialize user session if not exists
-    if (!this.userSessions[userId]) {
-      this.userSessions[userId] = { aiMode: false };
-    }
+    this.userSessions[userId] = {
+      aiMode: false,
+      language: detectedLanguage
+    };
 
     this.userSessions[userId].lastActivity = new Date();
 
@@ -45,13 +47,13 @@ export class MessageService {
 
     // Handle weather queries automatically
     if (this.isWeatherQuery(text)) {
-      await this.commandService.handleWeatherCommand(chatId);
+      await this.commandService.handleWeatherCommand(chatId, userId);
       return;
     }
 
     // Handle workout queries automatically
     if (this.isWorkoutQuery(text)) {
-      await this.commandService.handleWorkoutCommand(chatId);
+      await this.commandService.handleWorkoutCommand(chatId, userId);
       return;
     }
 
@@ -68,10 +70,10 @@ export class MessageService {
 
     switch (cmd) {
       case '/start':
-        await this.commandService.handleStartCommand(chatId);
+        await this.commandService.handleStartCommand(chatId, userId);
         break;
       case '/help':
-        await this.commandService.handleHelpCommand(chatId);
+        await this.commandService.handleHelpCommand(chatId, userId);
         break;
       case '/clear':
         await this.commandService.handleClearCommand(chatId, userId);
@@ -83,22 +85,26 @@ export class MessageService {
         await this.commandService.handleAIOffCommand(chatId, userId);
         break;
       case '/weather':
-        await this.commandService.handleWeatherCommand(chatId);
+        await this.commandService.handleWeatherCommand(chatId, userId);
         break;
       case '/workout':
-        await this.commandService.handleWorkoutCommand(chatId);
+        await this.commandService.handleWorkoutCommand(chatId, userId);
         break;
       case '/reminder':
         await this.commandService.handleReminderCommand(chatId, userId);
         break;
       case '/stop_reminder':
-        await this.commandService.handleStopReminderCommand(chatId);
+        await this.commandService.handleStopReminderCommand(chatId, userId);
         break;
-      default:
+      default: {
+        const language = this.userSessions[userId]?.language || 'en';
+        const msg = getMessages(language);
         await this.telegramService.sendMessage(
           chatId,
-          '❓ Perintah tidak dikenali. Ketik /help untuk melihat daftar perintah yang tersedia.'
+          msg.messages.unknownCommand
         );
+        break;
+      }
     }
   }
 
@@ -116,39 +122,51 @@ export class MessageService {
     } catch (error) {
       console.error('Error handling AI message:', error);
       
+      const language = this.userSessions[userId]?.language || 'en';
+      const msg = getMessages(language);
+      
       if (error instanceof Error) {
         if (error.message.includes('quota')) {
           await this.telegramService.sendMessage(
             chatId,
-            '⚠️ *Quota OpenAI terlampaui*\n\nMaaf, quota penggunaan OpenAI sudah habis untuk bulan ini. Silakan coba lagi bulan depan atau hubungi administrator.',
+            msg.messages.quotaExceeded,
             'Markdown'
           );
         } else if (error.message.includes('timeout') || error.message.includes('network')) {
           await this.telegramService.sendMessage(
             chatId,
-            '⚠️ Koneksi ke ChatGPT bermasalah. Silakan coba lagi dalam beberapa saat.'
+            msg.messages.connectionError
           );
         } else {
           await this.telegramService.sendMessage(
             chatId,
-            '❌ Maaf, terjadi kesalahan saat memproses pesan. Silakan coba lagi.'
+            msg.messages.generalError
           );
         }
       } else {
         await this.telegramService.sendMessage(
           chatId,
-          '❌ Terjadi kesalahan yang tidak terduga. Silakan coba lagi.'
+          msg.messages.unexpectedError
         );
       }
     }
   }
 
   private async handleRegularMessage(chatId: number, _text: string): Promise<void> {
+    const userId = Object.keys(this.userSessions).find(id => {
+      const session = this.userSessions[parseInt(id, 10)];
+      return session?.lastActivity && 
+        Date.now() - session.lastActivity.getTime() < 60000;
+    });
+    
+    const language = userId ? this.userSessions[parseInt(userId, 10)].language : 'en';
+    const msg = getMessages(language);
+    
     const responses = [
-      '🤖 Halo! Saya adalah AI chatbot. Aktifkan mode AI dengan /ai untuk chat dengan ChatGPT.',
-      '💡 Tip: Ketik /ai untuk mengaktifkan mode ChatGPT, atau tanya tentang cuaca/workout untuk info otomatis.',
-      '📝 Pesan Anda diterima! Gunakan /ai untuk chat AI atau /help untuk bantuan.',
-      '🔔 Mode AI sedang nonaktif. Ketik /ai untuk mengaktifkan ChatGPT atau /weather untuk cek cuaca.'
+      msg.botResponses.aiModeOff1,
+      msg.botResponses.aiModeOff2,
+      msg.botResponses.aiModeOff3,
+      msg.botResponses.aiModeOff4
     ];
 
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];

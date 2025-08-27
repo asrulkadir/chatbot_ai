@@ -12,7 +12,7 @@ A sophisticated Telegram bot integrated with ChatGPT, featuring weather services
 - ✅ Clean modular service-based architecture
 - ✅ Robust error handling and logging
 - ✅ TypeScript for type safety
-- ✅ Support for both Indonesian and English languages
+- ✅ **Automatic language detection** - Supports both Indonesian and English languages with smart detection
 
 ## 📋 Prerequisites
 
@@ -108,13 +108,13 @@ npm start
 
 ### AI Mode Commands
 - `/ai` - Enable AI ChatGPT mode
-- `/aioff` - Disable AI ChatGPT mode
+- `/ai_off` - Disable AI ChatGPT mode
 
 ### Weather & Workout Commands
 - `/weather` - Get current weather information
 - `/workout` - Get weather-based workout recommendations
 - `/reminder` - Enable weekend workout reminders
-- `/stopreminder` - Disable workout reminders
+- `/stop_reminder` - Disable workout reminders
 
 ### Smart Features
 - **Auto Weather Detection**: Ask about "weather", "cuaca", "temperature" to get automatic weather info
