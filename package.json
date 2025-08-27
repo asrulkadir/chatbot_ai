@@ -11,7 +11,15 @@
     "setup": "./setup.sh",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "test-config": "ts-node src/test-config.ts"
+    "test-config": "ts-node src/test-config.ts",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop ai-chatbot-telegram",
+    "pm2:restart": "pm2 restart ai-chatbot-telegram",
+    "pm2:reload": "pm2 reload ai-chatbot-telegram",
+    "pm2:delete": "pm2 delete ai-chatbot-telegram",
+    "pm2:logs": "pm2 logs ai-chatbot-telegram",
+    "pm2:status": "pm2 status",
+    "deploy": "npm run build && npm run pm2:reload"
   },
   "keywords": [
     "telegram",
