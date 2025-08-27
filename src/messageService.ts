@@ -90,12 +90,6 @@ export class MessageService {
       case '/workout':
         await this.commandService.handleWorkoutCommand(chatId, userId);
         break;
-      case '/reminder':
-        await this.commandService.handleReminderCommand(chatId, userId);
-        break;
-      case '/stop_reminder':
-        await this.commandService.handleStopReminderCommand(chatId, userId);
-        break;
       default: {
         const language = this.userSessions[userId]?.language || 'en';
         const msg = getMessages(language);

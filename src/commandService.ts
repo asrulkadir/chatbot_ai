@@ -1,7 +1,6 @@
 import type { UserSessions, BotConfig } from './types';
 import type { TelegramService } from './telegramService';
 import type { WeatherService } from './weatherService';
-import type { WorkoutReminderService } from './workoutReminderService';
 import type { ChatGPTService } from './chatGPTService';
 import { formatTemperature, getWeatherEmoji } from './utils';
 import { getMessages } from './messages';
@@ -9,7 +8,6 @@ import { getMessages } from './messages';
 export class CommandService {
   private telegramService: TelegramService;
   private weatherService: WeatherService | null;
-  private workoutReminderService: WorkoutReminderService | null;
   private chatGPTService: ChatGPTService;
   private userSessions: UserSessions;
   private config: BotConfig;
@@ -19,15 +17,13 @@ export class CommandService {
     chatGPTService: ChatGPTService,
     config: BotConfig,
     userSessions: UserSessions,
-    weatherService?: WeatherService,
-    workoutReminderService?: WorkoutReminderService
+    weatherService?: WeatherService
   ) {
     this.telegramService = telegramService;
     this.chatGPTService = chatGPTService;
     this.config = config;
     this.userSessions = userSessions;
     this.weatherService = weatherService || null;
-    this.workoutReminderService = workoutReminderService || null;
   }
 
   async handleStartCommand(chatId: number, userId?: number): Promise<void> {
@@ -66,8 +62,6 @@ ${msg.commands.ai}
 ${msg.commands.aiOff}
 ${msg.commands.weather}
 ${msg.commands.workout}
-${msg.commands.reminder}
-${msg.commands.stopReminder}
 
 ${msg.help.features}
 • 💬 ${language === 'id' ? 'Percakapan natural dengan AI (perlu aktivasi)' : 'Natural conversation with AI (activation required)'}
@@ -81,7 +75,6 @@ ${msg.help.features}
 ${msg.help.tips}
 ${msg.help.aiActivation}
 ${msg.help.weatherAuto}
-${msg.help.reminders}
 
 ${msg.help.startMessage}
     `;
@@ -243,71 +236,5 @@ ${msg.weather.keepSpirit}
       console.error('Error checking workout weather:', error);
       await this.telegramService.sendMessage(chatId, msg.messages.workoutError);
     }
-  }
-
-  async handleReminderCommand(chatId: number, userId: number): Promise<void> {
-    const language = this.userSessions[userId]?.language || 'en';
-    const msg = getMessages(language);
-    
-    if (!this.workoutReminderService) {
-      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ Layanan pengingat tidak tersedia.' : '❌ Reminder service is not available.');
-      return;
-    }
-
-    if (!this.config.openweatherApiKey) {
-      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ API key cuaca belum dikonfigurasi. Pengingat tidak dapat diaktifkan.' : '❌ Weather API key not configured. Reminder cannot be enabled.');
-      return;
-    }
-
-    try {
-      if (this.workoutReminderService.isReminderActive()) {
-        await this.telegramService.sendMessage(chatId, msg.messages.reminderAlreadyActive);
-        return;
-      }
-
-      this.workoutReminderService.startWeekendReminder(
-        userId,
-        this.config.reminderTime || '17:00',
-        this.config.reminderTimezone || 'Asia/Jakarta',
-        this.config.cityName || 'Jakarta',
-        this.config.countryCode || 'ID',
-        language
-      );
-
-      const message = `
-${msg.messages.reminderEnabled}
-
-${msg.reminder.weekendTime} *${this.config.reminderTime}*
-${msg.reminder.location} ${this.config.cityName}, ${this.config.countryCode}
-${msg.reminder.timezone} ${this.config.reminderTimezone}
-
-${msg.reminder.weatherCheck}
-
-${msg.reminder.stopInstruction}
-      `;
-
-      await this.telegramService.sendMessage(chatId, message, 'Markdown');
-    } catch (error) {
-      console.error('Error setting up reminder:', error);
-      await this.telegramService.sendMessage(chatId, msg.messages.reminderError);
-    }
-  }
-
-  async handleStopReminderCommand(chatId: number, userId?: number): Promise<void> {
-    const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
-    const msg = getMessages(language);
-    
-    if (!this.workoutReminderService) {
-      await this.telegramService.sendMessage(chatId, language === 'id' ? '❌ Layanan pengingat tidak tersedia.' : '❌ Reminder service is not available.');
-      return;
-    }
-
-    if (!this.workoutReminderService.isReminderActive()) {
-      await this.telegramService.sendMessage(chatId, msg.messages.reminderNotActive);
-      return;
-    }
-
-    this.workoutReminderService.stopReminder();
-    await this.telegramService.sendMessage(chatId, msg.messages.reminderStopped);
   }
 }

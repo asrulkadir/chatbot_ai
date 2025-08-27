@@ -43,8 +43,7 @@ export class BotService {
       this.chatGPTService,
       config,
       this.userSessions,
-      this.weatherService || undefined,
-      this.workoutReminderService || undefined
+      this.weatherService || undefined
     );
 
     // Initialize message service

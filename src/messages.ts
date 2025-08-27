@@ -27,8 +27,6 @@ export interface Messages {
     aiOff: string;
     weather: string;
     workout: string;
-    reminder: string;
-    stopReminder: string;
   };
   messages: {
     historyCleared: string;
@@ -174,7 +172,7 @@ export const messages: Record<string, Messages> = {
       tips: "*Tips:*",
       aiActivation: "• Aktifkan mode AI dengan /ai untuk chat dengan ChatGPT",
       weatherAuto: "• Tanya tentang \"cuaca\" atau \"workout\" untuk info otomatis",
-      reminders: "• Pengingat olahraga akan dikirim setiap Sabtu",
+      reminders: "• Pengingat olahraga berjalan otomatis setiap Sabtu",
       startMessage: "Mulai percakapan dengan mengirim pesan apa saja!"
     },
     commands: {
@@ -184,9 +182,7 @@ export const messages: Record<string, Messages> = {
       ai: "• /ai - Aktifkan mode AI ChatGPT",
       aiOff: "• /ai_off - Nonaktifkan mode AI ChatGPT",
       weather: "• /weather - Cek cuaca saat ini",
-      workout: "• /workout - Cek cuaca untuk olahraga",
-      reminder: "• /reminder - Atur pengingat olahraga weekend",
-      stopReminder: "• /stop_reminder - Hentikan pengingat olahraga"
+      workout: "• /workout - Cek cuaca untuk olahraga"
     },
     messages: {
       historyCleared: "🗑️ History percakapan telah dihapus. Silakan mulai percakapan baru!",
@@ -330,7 +326,7 @@ export const messages: Record<string, Messages> = {
       tips: "*Tips:*",
       aiActivation: "• Enable AI mode with /ai to chat with ChatGPT",
       weatherAuto: "• Ask about \"weather\" or \"workout\" for automatic info",
-      reminders: "• Workout reminders will be sent every Saturday",
+      reminders: "• Workout reminders run automatically every Saturday",
       startMessage: "Start conversation by sending any message!"
     },
     commands: {
@@ -340,9 +336,7 @@ export const messages: Record<string, Messages> = {
       ai: "• /ai - Enable AI ChatGPT mode",
       aiOff: "• /ai_off - Disable AI ChatGPT mode",
       weather: "• /weather - Check current weather",
-      workout: "• /workout - Check weather for workout",
-      reminder: "• /reminder - Set weekend workout reminder",
-      stopReminder: "• /stop_reminder - Stop workout reminder"
+      workout: "• /workout - Check weather for workout"
     },
     messages: {
       historyCleared: "🗑️ Conversation history has been cleared. Please start a new conversation!",
