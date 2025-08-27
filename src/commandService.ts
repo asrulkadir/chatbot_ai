@@ -103,7 +103,7 @@ ${msg.help.startMessage}
     
     await this.telegramService.sendMessage(
       chatId, 
-      msg.messages.aiModeEnabled,
+      msg.messages.aiModeEnabled
     );
   }
 
@@ -119,13 +119,12 @@ ${msg.help.startMessage}
     
     await this.telegramService.sendMessage(
       chatId, 
-      msg.messages.aiModeDisabled,
+      msg.messages.aiModeDisabled
     );
   }
 
   async handleWeatherCommand(chatId: number, userId?: number): Promise<void> {
     const language = userId && this.userSessions[userId] ? this.userSessions[userId].language : 'en';
-    console.log('Detected language:', language);
     const msg = getMessages(language);
     
     if (!this.weatherService) {
@@ -157,7 +156,7 @@ ${msg.weather.visibility} ${weather.visibility/1000} km
 ${msg.weather.dataSource}
       `;
       
-      await this.telegramService.sendMessage(chatId, message);
+      await this.telegramService.sendMessage(chatId, message, "Markdown");
     } catch (error) {
       console.error('Error getting weather:', error);
       await this.telegramService.sendMessage(chatId, msg.messages.weatherError);
@@ -194,8 +193,8 @@ ${msg.weather.goodForWorkout} ${weatherEmoji}
 ${msg.weather.location} ${weather.name}
 ${msg.weather.temperature} ${formatTemperature(weather.main.temp)} (${language === 'id' ? 'terasa' : 'feels like'} ${formatTemperature(weather.main.feels_like)})
 ${msg.weather.humidity} ${weather.main.humidity}%
-🌪️ ${language === 'id' ? '*Angin:*' : '*Wind:*'} ${weather.wind.speed} m/s
-☀️ ${msg.weather.condition} ${weather.weather[0].description}
+${msg.weather.windSpeed} ${weather.wind.speed} m/s
+${msg.weather.condition} ${weather.weather[0].description}
 
 ✅ ${weatherCheck.reason}
 
@@ -229,7 +228,7 @@ ${msg.weather.keepSpirit}
         `;
       }
 
-      await this.telegramService.sendMessage(chatId, message);
+      await this.telegramService.sendMessage(chatId, message, "Markdown");
     } catch (error) {
       console.error('Error checking workout weather:', error);
       await this.telegramService.sendMessage(chatId, msg.messages.workoutError);

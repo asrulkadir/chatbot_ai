@@ -86,7 +86,7 @@ ${messages.workoutReminder.weekendTitleGoodWeather}
 
 ${messages.workoutReminder.goodWeather.greeting} ${weatherEmoji}
 
-${messages.workoutReminder.weatherInfo} ${weather.name}:*
+*${messages.workoutReminder.weatherInfo} ${weather.name}:*
 ${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
 ${messages.workoutReminder.humidity} ${weather.main.humidity}%
 ${messages.workoutReminder.wind} ${weather.wind.speed} m/s
@@ -111,7 +111,7 @@ ${messages.workoutReminder.weekendTitleBadWeather}
 
 ${messages.workoutReminder.badWeather.greeting} ${weatherEmoji}
 
-${messages.workoutReminder.weatherInfo} ${weather.name}:*
+*${messages.workoutReminder.weatherInfo} ${weather.name}:*
 ${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
 ${messages.workoutReminder.humidity} ${weather.main.humidity}%
 ${messages.workoutReminder.wind} ${weather.wind.speed} m/s

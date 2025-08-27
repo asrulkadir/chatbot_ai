@@ -157,9 +157,9 @@ export interface Messages {
 export const messages: Record<string, Messages> = {
   id: {
     welcome: {
-      title: "🤖 *Selamat datang di AI Chatbot!*",
+      title: "🤖 Selamat datang di AI Chatbot!",
       description: "Halo! Saya adalah chatbot AI yang didukung oleh ChatGPT. Saya siap membantu Anda dengan berbagai pertanyaan dan percakapan.",
-      usage: "*Cara menggunakan:*",
+      usage: "Cara menggunakan:",
       aiMode: "• Ketik /ai untuk mengaktifkan mode AI ChatGPT",
       aiOff: "• Ketik /ai_off untuk menonaktifkan mode AI",
       weather: "• Tanya tentang cuaca atau workout untuk info otomatis",
@@ -167,12 +167,12 @@ export const messages: Record<string, Messages> = {
       start: "Silakan mulai percakapan dengan mengirim pesan!"
     },
     help: {
-      title: "📋 *Bantuan AI Chatbot*",
-      commands: "*Perintah yang tersedia:*",
-      features: "*Fitur:*",
-      tips: "*Tips:*",
+      title: "📋 Bantuan AI Chatbot",
+      commands: "Perintah yang tersedia:",
+      features: "Fitur:",
+      tips: "Tips:",
       aiActivation: "• Aktifkan mode AI dengan /ai untuk chat dengan ChatGPT",
-      weatherAuto: "• Tanya tentang \"cuaca\" atau \"workout\" untuk info otomatis",
+      weatherAuto: "• Tanya tentang 'cuaca' atau 'workout' untuk info otomatis",
       reminders: "• Pengingat olahraga berjalan otomatis setiap Sabtu",
       startMessage: "Mulai percakapan dengan mengirim pesan apa saja!"
     },
@@ -187,8 +187,8 @@ export const messages: Record<string, Messages> = {
     },
     messages: {
       historyCleared: "🗑️ History percakapan telah dihapus. Silakan mulai percakapan baru!",
-      aiModeEnabled: "🤖 *Mode AI ChatGPT diaktifkan!*\n\nSekarang semua pesan Anda akan diproses oleh ChatGPT. Ketik /ai_off untuk menonaktifkan.",
-      aiModeDisabled: "🚫 *Mode AI ChatGPT dinonaktifkan!*\n\nSekarang bot akan merespons hanya untuk command khusus dan query cuaca/workout.",
+      aiModeEnabled: "🤖 Mode AI ChatGPT diaktifkan!\n\nSekarang semua pesan Anda akan diproses oleh ChatGPT. Ketik /ai_off untuk menonaktifkan.",
+      aiModeDisabled: "🚫 Mode AI ChatGPT dinonaktifkan!\n\nSekarang bot akan merespons hanya untuk command khusus dan query cuaca/workout.",
       weatherUnavailable: "❌ Layanan cuaca tidak tersedia. API key cuaca belum dikonfigurasi.",
       weatherError: "❌ Maaf, tidak bisa mengambil data cuaca saat ini. Silakan coba lagi nanti.",
       workoutError: "❌ Maaf, tidak bisa mengecek cuaca untuk olahraga saat ini. Silakan coba lagi nanti.",
@@ -211,18 +211,18 @@ export const messages: Record<string, Messages> = {
       aiModeOff4: "🔔 Mode AI sedang nonaktif. Ketik /ai untuk mengaktifkan ChatGPT atau /weather untuk cek cuaca."
     },
     weather: {
-      currentWeather: "🌤️ *Cuaca Saat Ini*",
+      currentWeather: "🌤️ Cuaca Saat Ini",
       location: "📍 *Lokasi:*",
-      condition: "*Kondisi:*",
+      condition: "☀️ *Kondisi:*",
       temperature: "🌡️ *Suhu:*",
       humidity: "💧 *Kelembaban:*",
       windSpeed: "🌪️ *Kecepatan Angin:*",
       visibility: "👁️ *Visibilitas:*",
       dataSource: "_Data diambil dari OpenWeatherMap_",
-      goodForWorkout: "🏃‍♂️ *Cuaca Bagus untuk Olahraga!*",
-      notGoodForWorkout: "🏠 *Cuaca Kurang Ideal untuk Olahraga Outdoor*",
-      recommendations: "*Rekomendasi:*",
-      indoorAlternatives: "*Alternatif olahraga indoor:*",
+      goodForWorkout: "🏃‍♂️ Cuaca Bagus untuk Olahraga!",
+      notGoodForWorkout: "🏠 Cuaca Kurang Ideal untuk Olahraga Outdoor",
+      recommendations: "Rekomendasi:",
+      indoorAlternatives: "Alternatif olahraga indoor:",
       useProperClothing: "• Gunakan pakaian olahraga yang sesuai",
       stayHydrated: "• Jangan lupa minum air yang cukup",
       warmUp: "• Lakukan pemanasan sebelum olahraga",
@@ -312,9 +312,9 @@ export const messages: Record<string, Messages> = {
   },
   en: {
     welcome: {
-      title: "🤖 *Welcome to AI Chatbot!*",
+      title: "🤖 Welcome to AI Chatbot!",
       description: "Hello! I am an AI chatbot powered by ChatGPT. I'm ready to help you with various questions and conversations.",
-      usage: "*How to use:*",
+      usage: "How to use:",
       aiMode: "• Type /ai to enable AI ChatGPT mode",
       aiOff: "• Type /ai_off to disable AI mode",
       weather: "• Ask about weather or workout for automatic info",
@@ -322,12 +322,12 @@ export const messages: Record<string, Messages> = {
       start: "Please start the conversation by sending a message!"
     },
     help: {
-      title: "📋 *AI Chatbot Help*",
-      commands: "*Available commands:*",
-      features: "*Features:*",
-      tips: "*Tips:*",
+      title: "📋 AI Chatbot Help",
+      commands: "Available commands:",
+      features: "Features:",
+      tips: "Tips:",
       aiActivation: "• Enable AI mode with /ai to chat with ChatGPT",
-      weatherAuto: "• Ask about \"weather\" or \"workout\" for automatic info",
+      weatherAuto: "• Ask about 'weather' or 'workout' for automatic info",
       reminders: "• Workout reminders run automatically every Saturday",
       startMessage: "Start conversation by sending any message!"
     },
@@ -342,8 +342,8 @@ export const messages: Record<string, Messages> = {
     },
     messages: {
       historyCleared: "🗑️ Conversation history has been cleared. Please start a new conversation!",
-      aiModeEnabled: "🤖 *AI ChatGPT mode enabled!*\n\nNow all your messages will be processed by ChatGPT. Type /ai_off to disable.",
-      aiModeDisabled: "🚫 *AI ChatGPT mode disabled!*\n\nNow the bot will only respond to specific commands and weather/workout queries.",
+      aiModeEnabled: "🤖 AI ChatGPT mode enabled!\n\nNow all your messages will be processed by ChatGPT. Type /ai_off to disable.",
+      aiModeDisabled: "🚫 AI ChatGPT mode disabled!\n\nNow the bot will only respond to specific commands and weather/workout queries.",
       weatherUnavailable: "❌ Weather service is not available. Weather API key is not configured.",
       weatherError: "❌ Sorry, couldn't get weather data right now. Please try again later.",
       workoutError: "❌ Sorry, couldn't check weather for workout right now. Please try again later.",
@@ -368,7 +368,7 @@ export const messages: Record<string, Messages> = {
     weather: {
       currentWeather: "🌤️ *Current Weather*",
       location: "📍 *Location:*",
-      condition: "*Condition:*",
+      condition: "☀️ *Condition:*",
       temperature: "🌡️ *Temperature:*",
       humidity: "💧 *Humidity:*",
       windSpeed: "🌪️ *Wind Speed:*",
