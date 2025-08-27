@@ -70,13 +70,6 @@ export function detectLanguage(text: string): 'id' | 'en' {
   return indonesianScore > englishScore ? 'id' : 'en';
 }
 
-export function truncateText(text: string, maxLength: number = 100): string {
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return `${text.substring(0, maxLength)}...`;
-}
-
 export function formatTemperature(temp: number): string {
   return `${Math.round(temp)}°C`;
 }
