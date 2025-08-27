@@ -17,21 +17,21 @@ export class ChatGPTService {
   async getChatResponse(message: string, userId: number, language: 'id' | 'en' = 'id'): Promise<string> {
     try {
       const messages = getMessages(language);
-      
-      // Inisialisasi history chat jika belum ada
+
+      // Initialize chat history if it doesn't exist  
       if (!this.chatHistory[userId]) {
         this.chatHistory[userId] = [];
       }
 
-      // Tambahkan pesan user ke history
+      // Add user message to history
       this.chatHistory[userId].push({ role: 'user', content: message });
 
-      // Batasi history chat agar tidak terlalu panjang (maksimal 20 percakapan terakhir)
+      // Limit chat history to the last 20 messages
       if (this.chatHistory[userId].length > 20) {
         this.chatHistory[userId] = this.chatHistory[userId].slice(-20);
       }
 
-      // Buat system message sesuai bahasa yang dipilih
+      // Create system message based on selected language
       const systemMessage: ChatMessage = {
         role: 'system',
         content: language === 'id' 
@@ -39,10 +39,10 @@ export class ChatGPTService {
           : 'You are a friendly and helpful AI assistant. Answer questions in natural and informative English. Use appropriate emojis to make conversations more engaging.'
       };
 
-      // Gabungkan system message dengan history chat
+      // Combine system message with chat history
       const chatMessages = [systemMessage, ...this.chatHistory[userId]];
 
-      // Panggil OpenAI API
+      // Call OpenAI API
       const completion = await this.openai.chat.completions.create({
         model: this.config.openaiModel,
         messages: chatMessages,
@@ -52,12 +52,12 @@ export class ChatGPTService {
 
       const response = completion.choices[0]?.message?.content || messages.messages.aiDefaultResponse;
 
-      // Tambahkan respons assistant ke history
+      // Add AI response to history
       this.chatHistory[userId].push({ role: 'assistant', content: response });
 
       return response;
     } catch (error) {
-      console.error('Error mendapatkan respons ChatGPT:', error);
+      console.error('Error getting ChatGPT response:', error);
       const messages = getMessages(language);
       
       // Handle specific OpenAI errors
