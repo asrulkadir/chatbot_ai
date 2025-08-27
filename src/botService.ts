@@ -15,8 +15,10 @@ export class BotService {
   private messageService: MessageService;
   private userSessions: UserSessions = {};
   private isPolling = false;
+  private config: BotConfig;
 
   constructor(config: BotConfig) {
+    this.config = config;
     
     // Initialize core services
     this.telegramService = new TelegramService(config.telegramToken);
@@ -70,8 +72,50 @@ export class BotService {
     this.startPolling();
     console.log('🔄 Long polling started...');
     
+    // Auto start workout reminder if configured
+    await this.autoStartWorkoutReminder();
+    
     // Log available services
     this.logAvailableServices();
+  }
+
+  private async autoStartWorkoutReminder(): Promise<void> {
+    if (!this.workoutReminderService) {
+      console.log('⚠️ Workout reminder service not available - skipping auto start');
+      return;
+    }
+
+    if (!this.config.reminderUserId) {
+      console.log('⚠️ REMINDER_USER_ID not configured - skipping auto start reminder');
+      return;
+    }
+
+    try {
+      console.log('🏃‍♂️ Auto starting workout reminder...');
+      
+      // Check if reminder is already active
+      if (this.workoutReminderService.isReminderActive()) {
+        console.log('✅ Workout reminder already active');
+        return;
+      }
+
+      // Start the reminder with configured settings
+      this.workoutReminderService.startWeekendReminder(
+        this.config.reminderUserId,
+        this.config.reminderTime || '17:00',
+        this.config.reminderTimezone || 'Asia/Jakarta',
+        this.config.cityName || 'Jakarta',
+        this.config.countryCode || 'ID',
+        'id' // Default to Indonesian
+      );
+
+      console.log(`✅ Auto started workout reminder for user ${this.config.reminderUserId}`);
+      console.log(`📅 Schedule: Every Saturday at ${this.config.reminderTime} (${this.config.reminderTimezone})`);
+      console.log(`📍 Location: ${this.config.cityName}, ${this.config.countryCode}`);
+      
+    } catch (error) {
+      console.error('❌ Failed to auto start workout reminder:', error);
+    }
   }
 
   private startPolling(): void {
