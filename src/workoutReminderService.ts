@@ -31,10 +31,10 @@ export class WorkoutReminderService {
     // Format: 'minute hour * * day'
     // day: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     const [hour, minute] = time.split(':');
-    const cronExpression = `${minute} ${hour} * * 6`; // Setiap Sabtu
-    
-    console.log(`🕐 Mengatur pengingat workout untuk setiap Sabtu jam ${time} (${timezone})`);
-    console.log(`📍 Lokasi: ${cityName}, ${countryCode}`);
+    const cronExpression = `${minute} ${hour} * * 6`; // Every Saturday
+
+    console.log(`🕐 Setting up workout reminder for every Saturday at ${time} (${timezone})`);
+    console.log(`📍 Location: ${cityName}, ${countryCode}`);
 
     this.reminderJob = cron.schedule(
       cronExpression,
@@ -47,12 +47,12 @@ export class WorkoutReminderService {
       }
     );
 
-    console.log(`✅ Pengingat workout berhasil diatur!`);
+    console.log(`✅ Workout reminder successfully set up!`);
   }
 
   private async sendWorkoutReminder(userId: number, cityName: string, countryCode: string, language: 'id' | 'en' = 'id'): Promise<void> {
     try {
-      console.log(`🏃‍♂️ Mengirim pengingat workout ke user ${userId}`);
+      console.log(`🏃‍♂️ Sending workout reminder to user ${userId}`);
       const messages = getMessages(language);
 
       if (!this.weatherService) {
@@ -159,7 +159,7 @@ ${messages.workoutReminder.fallback.enjoy}
     if (this.reminderJob) {
       this.reminderJob.stop();
       this.reminderJob = null;
-      console.log('🛑 Pengingat workout dihentikan');
+      console.log('🛑 Workout reminder stopped');
     }
   }
 
