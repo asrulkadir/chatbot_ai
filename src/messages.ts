@@ -45,6 +45,7 @@ export interface Messages {
     generalError: string;
     unknownCommand: string;
     unexpectedError: string;
+    aiDefaultResponse: string;
   };
   botResponses: {
     aiModeOff1: string;
@@ -200,7 +201,8 @@ export const messages: Record<string, Messages> = {
       connectionError: "⚠️ Koneksi ke ChatGPT bermasalah. Silakan coba lagi dalam beberapa saat.",
       generalError: "❌ Maaf, terjadi kesalahan saat memproses pesan. Silakan coba lagi.",
       unknownCommand: "❓ Perintah tidak dikenali. Ketik /help untuk melihat daftar perintah yang tersedia.",
-      unexpectedError: "❌ Terjadi kesalahan yang tidak terduga. Silakan coba lagi."
+      unexpectedError: "❌ Terjadi kesalahan yang tidak terduga. Silakan coba lagi.",
+      aiDefaultResponse: "Maaf, saya tidak bisa memproses permintaan Anda saat ini. Silakan coba lagi nanti."
     },
     botResponses: {
       aiModeOff1: "🤖 Halo! Saya adalah AI chatbot. Aktifkan mode AI dengan /ai untuk chat dengan ChatGPT.",
@@ -354,7 +356,8 @@ export const messages: Record<string, Messages> = {
       connectionError: "⚠️ Connection to ChatGPT is having issues. Please try again in a moment.",
       generalError: "❌ Sorry, an error occurred while processing the message. Please try again.",
       unknownCommand: "❓ Command not recognized. Type /help to see available commands.",
-      unexpectedError: "❌ An unexpected error occurred. Please try again."
+      unexpectedError: "❌ An unexpected error occurred. Please try again.",
+      aiDefaultResponse: "Sorry, I can't process your request right now. Please try again later."
     },
     botResponses: {
       aiModeOff1: "🤖 Hello! I'm an AI chatbot. Enable AI mode with /ai to chat with ChatGPT.",

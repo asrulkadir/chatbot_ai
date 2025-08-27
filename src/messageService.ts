@@ -32,10 +32,16 @@ export class MessageService {
     const userName = formatUserName(user.first_name, user.last_name, user.username);
     const detectedLanguage = detectLanguage(text);
 
-    this.userSessions[userId] = {
-      aiMode: false,
-      language: detectedLanguage
-    };
+    // Initialize user session if it doesn't exist, otherwise preserve existing aiMode
+    if (!this.userSessions[userId]) {
+      this.userSessions[userId] = {
+        aiMode: false,
+        language: detectedLanguage
+      };
+    } else {
+      // Update language if needed, but preserve aiMode
+      this.userSessions[userId].language = detectedLanguage;
+    }
 
     this.userSessions[userId].lastActivity = new Date();
 
@@ -111,7 +117,8 @@ export class MessageService {
     try {
       await this.telegramService.sendChatAction(chatId, 'typing');
       
-      const response = await this.chatGPTService.getChatResponse(text, userId);
+      const language = this.userSessions[userId]?.language || 'en';
+      const response = await this.chatGPTService.getChatResponse(text, userId, language);
       await this.telegramService.sendMessage(chatId, response);
     } catch (error) {
       console.error('Error handling AI message:', error);
@@ -124,7 +131,6 @@ export class MessageService {
           await this.telegramService.sendMessage(
             chatId,
             msg.messages.quotaExceeded,
-            'Markdown'
           );
         } else if (error.message.includes('timeout') || error.message.includes('network')) {
           await this.telegramService.sendMessage(

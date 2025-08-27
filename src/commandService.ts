@@ -44,7 +44,7 @@ ${msg.welcome.help}
 ${msg.welcome.start}
     `;
 
-    await this.telegramService.sendMessage(chatId, welcomeMessage, 'Markdown');
+    await this.telegramService.sendMessage(chatId, welcomeMessage);
   }
 
   async handleHelpCommand(chatId: number, userId?: number): Promise<void> {
@@ -79,7 +79,7 @@ ${msg.help.weatherAuto}
 ${msg.help.startMessage}
     `;
 
-    await this.telegramService.sendMessage(chatId, helpMessage, 'Markdown');
+    await this.telegramService.sendMessage(chatId, helpMessage);
   }
 
   async handleClearCommand(chatId: number, userId: number): Promise<void> {
@@ -104,7 +104,6 @@ ${msg.help.startMessage}
     await this.telegramService.sendMessage(
       chatId, 
       msg.messages.aiModeEnabled,
-      'Markdown'
     );
   }
 
@@ -121,7 +120,6 @@ ${msg.help.startMessage}
     await this.telegramService.sendMessage(
       chatId, 
       msg.messages.aiModeDisabled,
-      'Markdown'
     );
   }
 
@@ -159,7 +157,7 @@ ${msg.weather.visibility} ${weather.visibility/1000} km
 ${msg.weather.dataSource}
       `;
       
-      await this.telegramService.sendMessage(chatId, message, 'Markdown');
+      await this.telegramService.sendMessage(chatId, message);
     } catch (error) {
       console.error('Error getting weather:', error);
       await this.telegramService.sendMessage(chatId, msg.messages.weatherError);
@@ -230,8 +228,8 @@ ${msg.weather.shadowBoxing}
 ${msg.weather.keepSpirit}
         `;
       }
-      
-      await this.telegramService.sendMessage(chatId, message, 'Markdown');
+
+      await this.telegramService.sendMessage(chatId, message);
     } catch (error) {
       console.error('Error checking workout weather:', error);
       await this.telegramService.sendMessage(chatId, msg.messages.workoutError);

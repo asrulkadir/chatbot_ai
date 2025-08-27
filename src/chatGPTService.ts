@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import type { ChatHistory, ChatMessage, BotConfig } from './types';
+import { getMessages } from './messages';
 
 export class ChatGPTService {
   private openai: OpenAI;
@@ -13,8 +14,10 @@ export class ChatGPTService {
     });
   }
 
-  async getChatResponse(message: string, userId: number): Promise<string> {
+  async getChatResponse(message: string, userId: number, language: 'id' | 'en' = 'id'): Promise<string> {
     try {
+      const messages = getMessages(language);
+      
       // Inisialisasi history chat jika belum ada
       if (!this.chatHistory[userId]) {
         this.chatHistory[userId] = [];
@@ -28,24 +31,26 @@ export class ChatGPTService {
         this.chatHistory[userId] = this.chatHistory[userId].slice(-20);
       }
 
-      // Buat system message untuk memberikan konteks ke ChatGPT
+      // Buat system message sesuai bahasa yang dipilih
       const systemMessage: ChatMessage = {
         role: 'system',
-        content: 'Kamu adalah asisten AI yang ramah dan membantu. Jawab pertanyaan dengan bahasa Indonesia yang natural dan informatif.'
+        content: language === 'id' 
+          ? 'Kamu adalah asisten AI yang ramah dan membantu. Jawab pertanyaan dengan bahasa Indonesia yang natural dan informatif. Gunakan emoji yang sesuai untuk membuat percakapan lebih menarik.'
+          : 'You are a friendly and helpful AI assistant. Answer questions in natural and informative English. Use appropriate emojis to make conversations more engaging.'
       };
 
       // Gabungkan system message dengan history chat
-      const messages = [systemMessage, ...this.chatHistory[userId]];
+      const chatMessages = [systemMessage, ...this.chatHistory[userId]];
 
       // Panggil OpenAI API
       const completion = await this.openai.chat.completions.create({
         model: this.config.openaiModel,
-        messages: messages,
+        messages: chatMessages,
         max_tokens: this.config.maxTokens,
         temperature: this.config.temperature,
       });
 
-      const response = completion.choices[0]?.message?.content || 'Maaf, saya tidak bisa memproses permintaan Anda saat ini.';
+      const response = completion.choices[0]?.message?.content || messages.messages.aiDefaultResponse;
 
       // Tambahkan respons assistant ke history
       this.chatHistory[userId].push({ role: 'assistant', content: response });
@@ -53,7 +58,19 @@ export class ChatGPTService {
       return response;
     } catch (error) {
       console.error('Error mendapatkan respons ChatGPT:', error);
-      return 'Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.';
+      const messages = getMessages(language);
+      
+      // Handle specific OpenAI errors
+      if (error instanceof Error) {
+        if (error.message.includes('quota') || error.message.includes('billing')) {
+          return messages.messages.quotaExceeded;
+        }
+        if (error.message.includes('timeout') || error.message.includes('network')) {
+          return messages.messages.connectionError;
+        }
+      }
+      
+      return messages.messages.generalError;
     }
   }
 

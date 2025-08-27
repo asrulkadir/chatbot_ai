@@ -6,10 +6,10 @@ import { getMessages } from './messages';
 export class WorkoutReminderService {
   private weatherService: WeatherService | null = null;
   private reminderJob: cron.ScheduledTask | null = null;
-  private sendMessageFunc: (chatId: number, text: string, parseMode?: string) => Promise<void>;
+  private sendMessageFunc: (chatId: number, text: string) => Promise<void>;
 
   constructor(
-    sendMessageFunc: (chatId: number, text: string, parseMode?: string) => Promise<void>,
+    sendMessageFunc: (chatId: number, text: string) => Promise<void>,
     weatherApiKey?: string
   ) {
     this.sendMessageFunc = sendMessageFunc;
@@ -70,7 +70,7 @@ ${messages.workoutReminder.basicReminder.comfortableShoes}
 ${messages.workoutReminder.basicReminder.enjoyWorkout}
         `;
         
-        await this.sendMessageFunc(userId, message, 'Markdown');
+        await this.sendMessageFunc(userId, message);
         return;
       }
 
@@ -103,7 +103,7 @@ ${messages.workoutReminder.goodWeather.chooseRoute}
 ${messages.workoutReminder.goodWeather.letsStart}
         `;
         
-        await this.sendMessageFunc(userId, message, 'Markdown');
+        await this.sendMessageFunc(userId, message);
       } else {
         // Weather is not good - suggest indoor exercise
         const message = `
@@ -129,7 +129,7 @@ ${messages.workoutReminder.badWeather.activeGames}
 ${messages.workoutReminder.badWeather.keepSpirit}
         `;
         
-        await this.sendMessageFunc(userId, message, 'Markdown');
+        await this.sendMessageFunc(userId, message);
       }
     } catch (error) {
       console.error('Error sending workout reminder:', error);
@@ -151,7 +151,7 @@ ${messages.workoutReminder.fallback.rainyActivity}
 ${messages.workoutReminder.fallback.enjoy}
       `;
       
-      await this.sendMessageFunc(userId, fallbackMessage, 'Markdown');
+      await this.sendMessageFunc(userId, fallbackMessage);
     }
   }
 
