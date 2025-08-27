@@ -2,29 +2,37 @@
   "name": "ai-chatbot-telegram",
   "version": "1.0.0",
   "description": "AI Chatbot Telegram terintegrasi dengan ChatGPT",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "node dist/main.js",
+    "dev": "ts-node src/main.ts",
     "watch": "tsc -w",
     "setup": "./setup.sh",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "test-config": "ts-node src/test-config.ts"
   },
-  "keywords": ["telegram", "chatbot", "chatgpt", "ai", "nodejs", "typescript"],
+  "keywords": [
+    "telegram",
+    "chatbot",
+    "chatgpt",
+    "ai",
+    "nodejs",
+    "typescript"
+  ],
   "author": "Asrul Kadir",
   "license": "MIT",
   "dependencies": {
-    "node-telegram-bot-api": "^0.65.1",
+    "dotenv": "^16.3.1",
     "openai": "^4.28.4",
-    "dotenv": "^16.3.1"
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
-    "@types/node-telegram-bot-api": "^0.64.7",
-    "typescript": "^5.3.3",
-    "ts-node": "^10.9.2"
+    "@types/node-cron": "^3.0.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
