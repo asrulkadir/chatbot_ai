@@ -40,28 +40,6 @@ A sophisticated Telegram bot integrated with ChatGPT, featuring weather services
    cp .env.example .env
    ```
 
-4. Edit `.env` file with your API keys:
-   ```env
-   # Required
-   TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-   OPENAI_API_KEY=your_openai_api_key_here
-   
-   # Optional ChatGPT Configuration
-   OPENAI_MODEL=gpt-4
-   MAX_TOKENS=1000
-   TEMPERATURE=0.7
-   
-   # Optional Weather Service
-   WEATHER_API_KEY=your_openweather_api_key_here
-   CITY_NAME=Jakarta
-   COUNTRY_CODE=ID
-   
-   # Optional Workout Reminder
-   REMINDER_USER_ID=your_telegram_user_id_here
-   REMINDER_TIME=08:00
-   REMINDER_TIMEZONE=Asia/Jakarta
-   ```
-
 ## 🎯 How to Get API Keys
 
 ### Telegram Bot Token
