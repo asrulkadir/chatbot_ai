@@ -1,105 +1,57 @@
 import axios from 'axios';
-import type { WeatherData } from './types';
 import { getMessages } from './messages';
+import type { BMKGLocation, BMKGResponse, BMKGWeatherItem } from './types';
+import { loadConfig } from './utils';
 
 export class WeatherService {
-  private apiKey: string;
-  private baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
+  private baseUrl = 'https://api.bmkg.go.id/publik/prakiraan-cuaca';
+  private config = loadConfig();
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  async getCurrentWeather(city: string, countryCode: string, language: 'id' | 'en' = 'en'): Promise<WeatherData> {
+  async getWeather(_language: 'id' | 'en' = 'en'): Promise<BMKGResponse> {
     try {
+      const regionCode = this.config.regionIdn;
+
       const response = await axios.get(this.baseUrl, {
         params: {
-          q: `${city},${countryCode}`,
-          appid: this.apiKey,
-          units: 'metric', // Celsius
-          lang: language // Dynamic language based on user preference
-        }
+          adm4: regionCode,
+        },
       });
 
       return response.data;
     } catch (error) {
-      console.error('Error fetching weather data:', error);
-      const messages = getMessages(language);
+      console.error('Error fetching BMKG weather data:', error);
+      const messages = getMessages(_language);
       throw new Error(messages.weather.errors.fetchFailed);
     }
   }
 
-  async isGoodWeatherForWorkout(city: string, countryCode: string, language: 'id' | 'en' = 'en'): Promise<{
+  async isGoodWeatherForWorkout(language: 'id' | 'en' = 'en'): Promise<{
     isGood: boolean;
     reason: string;
-    weather: WeatherData;
+    location: BMKGLocation;
+    weather: BMKGWeatherItem[];
   }> {
-    const weather = await this.getCurrentWeather(city, countryCode, language);
+    const weather = await this.getWeather(language);
     const messages = getMessages(language);
-    
-    const weatherMain = weather.weather[0].main.toLowerCase();
-    const temp = weather.main.temp;
-    const humidity = weather.main.humidity;
-    const windSpeed = weather.wind.speed;
 
-    // Weather conditions for good jogging:
-    // - No rain/storm
-    // - Temperature between 15-35°C
-    // - Humidity < 85%
-    // - Wind speed < 10 m/s
+    // Get weather code and location
+    const weatherCode = weather.data[0]?.cuaca[0]?.[0]?.weather;
+    const location = weather?.lokasi;
 
-    if (weatherMain.includes('rain') || weatherMain.includes('drizzle')) {
+    if (weatherCode >= 0 && weatherCode <= 3) {
       return {
-        isGood: false,
-        reason: messages.weather.conditions.rainy,
-        weather
-      };
-    }
-
-    if (weatherMain.includes('thunderstorm')) {
-      return {
-        isGood: false,
-        reason: messages.weather.conditions.thunderstorm,
-        weather
-      };
-    }
-
-    if (temp < 15) {
-      return {
-        isGood: false,
-        reason: messages.weather.conditions.tooCold,
-        weather
-      };
-    }
-
-    if (temp > 35) {
-      return {
-        isGood: false,
-        reason: messages.weather.conditions.tooHot,
-        weather
-      };
-    }
-
-    if (humidity > 85) {
-      return {
-        isGood: false,
-        reason: messages.weather.conditions.highHumidity,
-        weather
-      };
-    }
-
-    if (windSpeed > 10) {
-      return {
-        isGood: false,
-        reason: messages.weather.conditions.strongWind,
-        weather
+        isGood: true,
+        reason: messages.weather.conditions.perfectForJogging,
+        location,
+        weather: weather.data[0]?.cuaca?.[0],
       };
     }
 
     return {
-      isGood: true,
-      reason: messages.weather.conditions.perfectForJogging,
-      weather
+      isGood: false,
+      reason: messages.weather.conditions.notPerfectForJogging,
+      location,
+      weather: weather.data[0]?.cuaca?.flat(),
     };
   }
 }

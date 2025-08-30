@@ -4,27 +4,29 @@ import { formatTemperature, getWeatherEmoji } from './utils';
 import { getMessages } from './messages';
 
 export class WorkoutReminderService {
-  private weatherService: WeatherService | null = null;
+  private weatherService: WeatherService;
   private reminderJob: cron.ScheduledTask | null = null;
-  private sendMessageFunc: (chatId: number, text: string) => Promise<void>;
+  private sendMessageFunc: (
+    chatId: number,
+    text: string,
+    parseMode?: 'Markdown' | 'HTML'
+  ) => Promise<void>;
 
   constructor(
-    sendMessageFunc: (chatId: number, text: string) => Promise<void>,
-    weatherApiKey?: string
+    sendMessageFunc: (
+      chatId: number,
+      text: string,
+      parseMode?: 'Markdown' | 'HTML'
+    ) => Promise<void>
   ) {
     this.sendMessageFunc = sendMessageFunc;
-    
-    if (weatherApiKey) {
-      this.weatherService = new WeatherService(weatherApiKey);
-    }
+    this.weatherService = new WeatherService();
   }
 
   startWeekendReminder(
-    userId: number, 
+    userId: number,
     time: string,
     timezone: string,
-    cityName: string,
-    countryCode: string,
     language: 'id' | 'en' = 'id'
   ): void {
     // Schedule reminder for every Saturday
@@ -33,64 +35,58 @@ export class WorkoutReminderService {
     const [hour, minute] = time.split(':');
     const cronExpression = `${minute} ${hour} * * 6`; // Every Saturday
 
-    console.log(`🕐 Setting up workout reminder for every Saturday at ${time} (${timezone})`);
-    console.log(`📍 Location: ${cityName}, ${countryCode}`);
+    console.log(
+      `🕐 Setting up workout reminder for every Saturday at ${time} (${timezone})`
+    );
 
     this.reminderJob = cron.schedule(
       cronExpression,
       async () => {
-        await this.sendWorkoutReminder(userId, cityName, countryCode, language);
+        await this.sendWorkoutReminder(userId, language);
       },
       {
         scheduled: true,
-        timezone: timezone
+        timezone: timezone,
       }
     );
 
     console.log(`✅ Workout reminder successfully set up!`);
   }
 
-  private async sendWorkoutReminder(userId: number, cityName: string, countryCode: string, language: 'id' | 'en' = 'id'): Promise<void> {
+  private async sendWorkoutReminder(
+    userId: number,
+    language: 'id' | 'en' = 'id'
+  ): Promise<void> {
     try {
       console.log(`🏃‍♂️ Sending workout reminder to user ${userId}`);
       const messages = getMessages(language);
 
-      if (!this.weatherService) {
-        // Jika tidak ada weather service, kirim pengingat biasa
-        const message = `
-${messages.workoutReminder.basicReminder.title}
-
-${messages.workoutReminder.basicReminder.greeting}
-
-${messages.workoutReminder.basicReminder.dontForget}
-${messages.workoutReminder.basicReminder.warmUp}
-${messages.workoutReminder.basicReminder.stayHydrated}
-${messages.workoutReminder.basicReminder.comfortableShoes}
-
-${messages.workoutReminder.basicReminder.enjoyWorkout}
-        `;
-        
-        await this.sendMessageFunc(userId, message);
-        return;
-      }
-
       // Check weather conditions
-      const weatherCheck = await this.weatherService.isGoodWeatherForWorkout(cityName, countryCode, language);
-      const weather = weatherCheck.weather;
-      const weatherEmoji = getWeatherEmoji(weather.weather[0].main);
-      
+      const weatherCheck = await this.weatherService.isGoodWeatherForWorkout(
+        language
+      );
+      const weather = weatherCheck.weather?.[0];
+      const location = weatherCheck.location;
+      const weatherEmoji = getWeatherEmoji(weather?.weather_desc_en);
+
       if (weatherCheck.isGood) {
         // Weather is good - suggest jogging
         const message = `
 ${messages.workoutReminder.weekendTitleGoodWeather}
 
-${messages.workoutReminder.goodWeather.greeting} ${weatherEmoji}
+${messages.workoutReminder.goodWeather.greeting}
 
-*${messages.workoutReminder.weatherInfo} ${weather.name}:*
-${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
-${messages.workoutReminder.humidity} ${weather.main.humidity}%
-${messages.workoutReminder.wind} ${weather.wind.speed} m/s
-${messages.workoutReminder.visibility} ${weather.visibility/1000} km
+${messages.weather.location} ${location.kotkab}
+${weatherEmoji} ${messages.weather.condition} ${
+          language === 'id' ? weather.weather_desc : weather.weather_desc_en
+        }
+${messages.weather.temperature} ${formatTemperature(weather.t)}
+${messages.weather.humidity} ${weather.hu}%
+${messages.weather.windSpeed} ${weather.ws} m/s
+${messages.weather.visibility} ${(weather.vs / 1000).toFixed(1)} km
+${messages.weather.time} ${weather.local_datetime}
+
+${messages.weather.dataSource}
 
 ${weatherCheck.reason} 🌟
 
@@ -102,34 +98,37 @@ ${messages.workoutReminder.goodWeather.chooseRoute}
 
 ${messages.workoutReminder.goodWeather.letsStart}
         `;
-        
-        await this.sendMessageFunc(userId, message);
+
+        await this.sendMessageFunc(userId, message, 'Markdown');
       } else {
         // Weather is not good - suggest indoor exercise
         const message = `
 ${messages.workoutReminder.weekendTitleBadWeather}
 
-${messages.workoutReminder.badWeather.greeting} ${weatherEmoji}
+${messages.workoutReminder.badWeather.greeting}
 
-*${messages.workoutReminder.weatherInfo} ${weather.name}:*
-${messages.workoutReminder.temperature} ${formatTemperature(weather.main.temp)} ${messages.workoutReminder.feelsLike} ${formatTemperature(weather.main.feels_like)})
-${messages.workoutReminder.humidity} ${weather.main.humidity}%
-${messages.workoutReminder.wind} ${weather.wind.speed} m/s
-${messages.workoutReminder.condition} ${weather.weather[0].description}
+${messages.weather.location} ${location.kotkab}
+${weatherEmoji} ${messages.weather.condition} ${
+          language === 'id' ? weather.weather_desc : weather.weather_desc_en
+        }
+${messages.weather.temperature} ${formatTemperature(weather.t)}
+${messages.weather.humidity} ${weather.hu}%
+${messages.weather.windSpeed} ${weather.ws} m/s
+${messages.weather.visibility} ${(weather.vs / 1000).toFixed(1)} km
+${messages.weather.time} ${weather.local_datetime}
+
+${messages.weather.dataSource}
 
 ⚠️ ${weatherCheck.reason}
 
 ${messages.workoutReminder.badWeather.alternativesTitle}
 ${messages.workoutReminder.badWeather.homeWorkout}
-${messages.workoutReminder.badWeather.yoga}
-${messages.workoutReminder.badWeather.danceWorkout}
-${messages.workoutReminder.badWeather.shadowBoxing}
 ${messages.workoutReminder.badWeather.activeGames}
 
 ${messages.workoutReminder.badWeather.keepSpirit}
         `;
-        
-        await this.sendMessageFunc(userId, message);
+
+        await this.sendMessageFunc(userId, message, 'Markdown');
       }
     } catch (error) {
       console.error('Error sending workout reminder:', error);
@@ -150,8 +149,8 @@ ${messages.workoutReminder.fallback.rainyActivity}
 
 ${messages.workoutReminder.fallback.enjoy}
       `;
-      
-      await this.sendMessageFunc(userId, fallbackMessage);
+
+      await this.sendMessageFunc(userId, fallbackMessage, 'Markdown');
     }
   }
 

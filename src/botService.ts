@@ -19,31 +19,26 @@ export class BotService {
 
   constructor(config: BotConfig) {
     this.config = config;
-    
+
     // Initialize core services
     this.telegramService = new TelegramService(config.telegramToken);
     this.chatGPTService = new ChatGPTService(config);
-    
-    // Initialize weather service if API key is available
-    this.weatherService = config.openweatherApiKey 
-      ? new WeatherService(config.openweatherApiKey)
-      : null;
-    
-    // Initialize workout reminder service if weather service is available
-    this.workoutReminderService = this.weatherService 
-      ? new WorkoutReminderService(
-          (userId: number, message: string) => this.telegramService.sendMessage(userId, message),
-          config.openweatherApiKey
-        )
-      : null;
+
+    // Initialize weather service (BMKG tidak memerlukan API key)
+    this.weatherService = new WeatherService();
+
+    // Initialize workout reminder service
+    this.workoutReminderService = new WorkoutReminderService(
+      (userId: number, message: string, parseMode) =>
+        this.telegramService.sendMessage(userId, message, parseMode)
+    );
 
     // Initialize command service
     this.commandService = new CommandService(
       this.telegramService,
       this.chatGPTService,
-      config,
       this.userSessions,
-      this.weatherService || undefined
+      this.weatherService
     );
 
     // Initialize message service
@@ -51,7 +46,7 @@ export class BotService {
       this.telegramService,
       this.chatGPTService,
       this.commandService,
-      this.userSessions,
+      this.userSessions
     );
   }
 
@@ -103,8 +98,6 @@ export class BotService {
         this.config.reminderUserId,
         this.config.reminderTime || '17:00',
         this.config.reminderTimezone || 'Asia/Jakarta',
-        this.config.cityName || 'Jakarta',
-        this.config.countryCode || 'ID',
         'id' // Default to Indonesian
       );
 

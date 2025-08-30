@@ -52,7 +52,7 @@ A sophisticated Telegram bot integrated with ChatGPT, featuring weather services
    TEMPERATURE=0.7
    
    # Optional Weather Service
-   OPENWEATHER_API_KEY=your_openweather_api_key_here
+   WEATHER_API_KEY=your_openweather_api_key_here
    CITY_NAME=Jakarta
    COUNTRY_CODE=ID
    
