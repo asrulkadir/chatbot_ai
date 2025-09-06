@@ -3,10 +3,14 @@ module.exports = {
     {
       name: 'ai-chatbot-telegram',
       script: 'dist/main.js',
+
+      // Process management
       instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
-      max_memory_restart: '4G',
+
+      // Environment
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
@@ -15,45 +19,33 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000,
       },
-      // Error and log configuration
+      env_file: '.env',
+
+      // Logging
       error_file: './logs/err.log',
       out_file: './logs/out.log',
       log_file: './logs/combined.log',
+      merge_logs: true,
       time: true,
 
-      // Auto restart configuration
+      // Auto restart (default: unlimited)
       min_uptime: '10s',
-      max_restarts: 10,
 
-      // Advanced PM2 features
-      exec_mode: 'fork',
-
-      // Environment variables (akan di-override oleh .env file)
-      env_file: '.env',
-
-      // Source map support for better error tracking
-      source_map_support: true,
-
-      // Instance configuration
-      merge_logs: true,
-
-      // Health check
-      health_check_grace_period: 3000,
-
-      // Graceful shutdown
+      // Health check & shutdown
+      listen_timeout: 10000,
+      health_check_grace_period: 10000,
       kill_timeout: 5000,
-      listen_timeout: 3000,
 
-      // Node.js specific options
-      node_args: '--max-old-space-size=512',
+      // Source map support
+      source_map_support: true,
     },
   ],
 
   // Deployment configuration (optional)
   deploy: {
     production: {
-      user: 'ubuntu', // ganti dengan username VPS Anda
-      host: 'your-vps-ip', // ganti dengan IP VPS Anda
+      user: 'ubuntu',
+      host: 'your-vps-ip',
       ref: 'origin/main',
       repo: 'https://github.com/asrulkadir/chatbot_ai.git',
       path: '/home/ubuntu/chatbot_ai',
